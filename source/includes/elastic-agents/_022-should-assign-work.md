@@ -64,7 +64,7 @@ The request body will contain the following JSON elements:
 
 | Key                 | Type     | Description |
 | ------------------- | -------- | ----------- |
-| `environment`       | `String` | The `environment` that this job belongs to. See the [environments section](https://docs.go.cd/current/introduction/concepts_in_go.html#environment) to know more about environments. |
+| `environment`       | `String` | The `environment` that this job belongs to. See the [environments section](https://docs.gocd.io/current/introduction/concepts_in_go.html#environment) to know more about environments. |
 | `agent`             | `Object` | An object describing the [elastic agent](#elastic-agent-object). |
 | `properties`        | `Object` | Jobs that require elastic agents, will have an `<agentConfig/>` element on it. This object represents the key value pairs that form this configuration. |
 

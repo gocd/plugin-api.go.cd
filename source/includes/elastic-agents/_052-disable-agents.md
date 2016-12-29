@@ -44,7 +44,7 @@ public class DockerPlugin implements GoPlugin {
 }
 ```
 
-Before a plugin terminates an agent instance, it must first disable it in order to prevent jobs from being assigned to it. This call is the equivalent of setting `isDisabled` on an `<agent/>` element in the config XML. More information about the agent config here, can be found in the [configuration reference](https://docs.go.cd/current/configuration/configuration_reference.html#agent).
+Before a plugin terminates an agent instance, it must first disable it in order to prevent jobs from being assigned to it. This call is the equivalent of setting `isDisabled` on an `<agent/>` element in the config XML. More information about the agent config here, can be found in the [configuration reference](https://docs.gocd.io/current/configuration/configuration_reference.html#agent).
 
 Agents in any state can be disabled, this will prevent jobs from being assigned to it. Any jobs the agent is running will eventually complete.
 

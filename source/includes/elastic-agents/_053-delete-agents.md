@@ -50,7 +50,7 @@ public class DockerPlugin implements GoPlugin {
 }
 ```
 
-Before the delete-agent message is sent to the server, the plugin MUST ensure that the agent is terminated. This call is the equivalent of removing the `<agent/>` element in the config XML. More information about the agent config here, can be found in the [configuration reference](https://docs.go.cd/current/configuration/configuration_reference.html#agent).
+Before the delete-agent message is sent to the server, the plugin MUST ensure that the agent is terminated. This call is the equivalent of removing the `<agent/>` element in the config XML. More information about the agent config here, can be found in the [configuration reference](https://docs.gocd.io/current/configuration/configuration_reference.html#agent).
 
 <aside class="notice">
   <strong>Important:</strong> Before an agent is terminated, it is recommended to ensure that it is first <a href='#disable-agents'>disabled</a> and that the <code>agent_state</code> is <code>Idle</code>. This will ensure that any jobs that an agent is running are completed.

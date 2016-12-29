@@ -65,8 +65,8 @@ The request body will contain the following JSON elements:
 
 | Key                 | Type     | Description |
 | ------------------- | -------- | ----------- |
-| `auto_register_key` | `String` | The key that an agent should use, if it should be auto-registered with the server. The plugin is expected to use the key to create an appropriate `autoregister.properties` file on the agent instance, before it starts the agent process. See the [auto-register documentation](https://docs.go.cd/current/advanced_usage/agent_auto_register.html) for more information. |
-| `environment`       | `String` | The `environment` that this job belongs to. Agents are expected to auto-register using this environment so that they can be assigned to the correct job. See the [environments section](https://docs.go.cd/current/introduction/concepts_in_go.html#environment) to know more about environments. |
+| `auto_register_key` | `String` | The key that an agent should use, if it should be auto-registered with the server. The plugin is expected to use the key to create an appropriate `autoregister.properties` file on the agent instance, before it starts the agent process. See the [auto-register documentation](https://docs.gocd.io/current/advanced_usage/agent_auto_register.html) for more information. |
+| `environment`       | `String` | The `environment` that this job belongs to. Agents are expected to auto-register using this environment so that they can be assigned to the correct job. See the [environments section](https://docs.gocd.io/current/introduction/concepts_in_go.html#environment) to know more about environments. |
 | `properties`        | `Object` | Jobs that require elastic agents, will have an `<agentConfig/>` element on it. This object represents the key value pairs that form this configuration. |
 
 <p class='response-code-heading'>Response code</p>

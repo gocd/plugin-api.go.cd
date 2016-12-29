@@ -25,8 +25,8 @@ then brought down when not needed. This feature should enable a more flexible an
 ## Current process of handling agents
 
 Agents are currently started manually or automatically by scripts written by users. They are registered to the GoCD
-server manually, on the [agents page](https://docs.go.cd/current/navigation/agents_page.html) or
-automatically, using [auto-registration](https://docs.go.cd/current/advanced_usage/agent_auto_register.html).
+server manually, on the [agents page](https://docs.gocd.io/current/navigation/agents_page.html) or
+automatically, using [auto-registration](https://docs.gocd.io/current/advanced_usage/agent_auto_register.html).
 
 Idle agents, after registration with the server, continuously poll the server, asking for jobs to run. When a stage is
 triggered, the jobs that need to be started are identified by the server. Suitable jobs are assigned to agents
@@ -83,7 +83,7 @@ The plugin decides whether to assign an agent to a job, or to start another agen
 1. When a job is [scheduled](#glossary-schedule), if its job configuration contains a elasticProfileId, the job is
    not considered for normal [assignment](#glossary-assign) as described in the previous section.
 2. The  plugin corresponding for that job elasticProfileId is contacted
-   (to [create an agent](https://plugin-api.go.cd/current/elastic-agents/#create-agent)),
+   (to [create an agent](https://plugin-api.gocd.io/current/elastic-agents/#create-agent)),
    along with the corresponding profile configuration for which this assignment needs to be made.
 3. At this point the plugin may, at its discretion, create an agent or not.
    1. If it sees that there are no idle agents that satisfy the profile, it may choose to spin a new agent.
@@ -94,7 +94,7 @@ The plugin decides whether to assign an agent to a job, or to start another agen
    it to choose, again.
 5. When an elastic-agent pings the server for work, and if there is a job that requires an elastic-agent, then the
    corresponding plugin for that job is contacted (to check if the server
-   [should assign work](https://plugin-api.go.cd/current/elastic-agents/#should-assign-work) to the agent), along with the
+   [should assign work](https://plugin-api.gocd.io/current/elastic-agents/#should-assign-work) to the agent), along with the
    profile configuration for which this assignment needs to be made.
 
 <aside class='notice'>
