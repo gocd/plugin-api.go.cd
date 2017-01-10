@@ -1,0 +1,89 @@
+# Authorization Plugins(Beta)
+
+## Introduction
+
+Currently GoCD provides multiple ways of Authentication, GoCD can be configured to use File based Authentication, LDAP/Active Directory Authentication and Plugin Based Authentication.
+
+Apart from Authentication, GoCD provides ability to restrict certain operations to specific Users and Roles. GoCD provides an ability to create and manage Roles which is just a group of users.
+
+Currently, roles can be managed only through GoCD and it does not provide an ability to use roles defined in systems used for authentication. With this limitation, administrators need to configure roles in multiples places.
+
+With the introduction of Authorization Plugin(Beta)  GoCD is moving in a direction where Authentication/Authorization is moved out of GoCD into plugins. With this, the Authorization Plugins would be responsible to provide Identity Service. The plugins have the flexibility to use any identity service providers like LDAP, Github etc.
+
+If you're looking to start away with a basic template for authorization plugins, we recommend forking this [Github repository](https://github.com/gocd-contrib/authorization-skeleton-plugin).
+
+## Configuring Authorization Plugin
+Authorization Plugins need two types of configuration, `<authConfig>` and `<pluginRole>`.
+
+<p class='request-body-heading'>Authorization Configuration</p>
+
+This is used to configure settings at the plugin level. Typically this would contain configurations that can be used to connect to an identity service e.g `LDAP URI`, `Manager DN`, `Manager Password` etc.
+
+The `<authConfig>` have two attributes on it:
+
+<p class='attributes-table-follows'></p>
+
+| Key        | Type      | Description |
+| ---------- | --------- | ----------- |
+| `id`       | `String`  | Unique id of `<authConfig>` |
+| `pluginId` | `String`  | This will link `<authConfig>` with plugin |
+
+> An example authorization configuration
+
+```xml
+<authConfigs>
+  <authConfig id="ldap" pluginId="cd.go.authorization.ldap">
+    <property>
+      <key>Url</key>
+      <value>ldap://ldap.server.url:10389</value>
+    </property>
+    <property>
+      <key>ManagerDN</key>
+      <value>uid=admin,ou=system</value>
+    </property>
+    <property>
+      <key>SearchBase</key>
+      <value>ou=users,ou=system</value>
+    </property>
+    <property>
+      <key>Password</key>
+      <value>secret</value>
+    </property>
+    <property>
+      <key>SearchFilter</key>
+      <value>uid</value>
+    </property>
+    <property>
+      <key>DisplayNameAttribute</key>
+      <value>displayName</value>
+    </property>
+  </authConfig>
+</authConfigs>
+```
+
+<p class='request-body-heading'>Plugin Role Configuration</p>
+
+This is used to configure roles, unlike the current roles which contains a list of users pluginRole provides configuration to map a role to an ACL in an external identity service. e.g pluginRole can be used to define mappings between LDAP group and GoCD roles.
+
+The `<pluginRole>` have two attributes on it:
+
+<p class='attributes-table-follows'></p>
+
+| Key              | Type      | Description |
+| ---------------- | --------- | ----------- |
+| `name`           | `String`  | Unique `role` name   |
+| `authConfigId`   | `String`  | This attributes link this role with `<authConfig>` |
+
+> An example plugin role configuration
+
+```xml
+<pluginRole name="spacetiger" authConfigId="ldap">
+          <property>
+            <key>memberOf</key>
+            <value>ou=foo,ou=example,ou=com</value>
+          </property>
+ </pluginRole>
+```
+
+
+<%= partial 'includes/shared/plugin-structure.md.erb', locals: { plugin_class: 'LdapAuthorizationPlugin', plugin_type: 'authorization', minimum_version: '17.2.0' } %>
