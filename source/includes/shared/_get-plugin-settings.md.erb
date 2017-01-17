@@ -19,7 +19,7 @@ public class <%= plugin_class %> implements GoPlugin {
   }
 
   public GoPluginIdentifier pluginIdentifier() {
-    return new GoPluginIdentifier("<%= plugin_type %>", Arrays.asList("1.0"))
+    return new GoPluginIdentifier("<%= plugin_type %>", Arrays.asList("<%= endpoint_version %>"))
   }
 
   private PluginSettings getSettings() {

@@ -114,7 +114,7 @@ public class <%= plugin_class %> implements GoPlugin {
   // a GoPluginIdentifier tells GoCD what kind of a plugin this is
   // and what version(s) of the request/response API it supports
   public GoPluginIdentifier pluginIdentifier() {
-    return new GoPluginIdentifier("<%= plugin_type %>", Arrays.asList("1.0"))
+    return new GoPluginIdentifier("<%= plugin_type %>", Arrays.asList("<%= endpoint_version %>"))
   }
 
   // handle the request and return a response
