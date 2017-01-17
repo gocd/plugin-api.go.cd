@@ -15,6 +15,7 @@ This message is sent by the server, when it wants to notify the plugin about a "
   "pipeline": {
     "name": "pipeline-name",
     "counter": "1",
+    "label": "pipeline-label",
     "group": "pipeline-group",
     "build-cause": [
       {
@@ -44,12 +45,13 @@ This message is sent by the server, when it wants to notify the plugin about a "
       "state": "Passed",
       "result": "Passed",
       "create-time": "2011-07-13T19:43:37.100Z",
-      "last-transition-time": "2011-07-13T19:43:37.100Z",
+      "last-transition-time": "2011-07-13T19:43:39.100Z",
       "jobs": [
         {
           "name": "job-name",
           "schedule-time": "2011-07-13T19:43:37.100Z",
-          "complete-time": "2011-07-13T19:43:37.100Z",
+          "assign-time": "2011-07-13T19:43:38.100Z",
+          "complete-time": "2011-07-13T19:43:39.100Z",
           "state": "Completed",
           "result": "Passed",
           "agent-uuid": "uuid"
