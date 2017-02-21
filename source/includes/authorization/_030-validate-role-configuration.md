@@ -8,7 +8,7 @@ If a plugin requires any authorization configuration, this message must be imple
 
 <p class='request-body-heading'>Request body</p>
 
-> An example validation request body for LDAP plugin 
+> An example validation request body for LDAP plugin
 
 ```json
 {
@@ -29,18 +29,10 @@ The plugin is expected to return status `200` if it can understand the request.
 ```json
 [
   {
-    "message": "MemberOf must not be blank.",
-    "key": "MemberOf"
+   "key": "MemberOf",
+   "message": "MemberOf cannot be blank"
   }
 ]
 ```
 
-The response body will contain the following JSON elements:
-
-<p class='attributes-table-follows'></p>
-
-| Key       | Type      | Description |
-| --------- | --------- | ----------- |
-| `key`     | `String`  | The name of configuration key that has an error. |
-| `message` | `String`  | The error message associated with that key. |
-
+If any of the input keys have a validation error on them, the plugin is expected to return a list of [validation error objects](#the-validation-error-object). If the configuration is valid, the plugin should return an empty JSON array.

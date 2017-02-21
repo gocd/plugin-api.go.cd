@@ -1,0 +1,63 @@
+# Request/Response JSON Objects
+
+<%
+get_settings_view = {
+  template: '<div class="form_item_block">...</div>'
+}
+%>
+
+<%=
+describe_sub_object 'The Settings View Object', json: get_settings_view, html_id: 'the-get-settings-view-object' do
+  template    'String', 'A string containing an HTML AngularJS based view.'
+end
+%>
+
+<%
+image = {
+  'content_type' => 'image/svg+xml',
+  'data' => '....'
+}
+%>
+
+<%=
+describe_sub_object 'The Image Object', json: image, html_id: 'the-image-object' do
+  content_type 'String', 'A valid [content type](http://www.iana.org/assignments/media-types/media-types.xhtml#image) for the image. Please make sure the content type is supported by most browsers.'
+  data         'String', "A [base-64](https://en.wikipedia.org/wiki/Base64) encoded (single-line non-chunking) byte array of the byte-sequence that composes the image."
+end
+%>
+
+<%
+validation_error_object = [
+  {
+    key: 'email_address',
+    message: 'Email address is invalid'
+  },
+  {
+    key: 'password',
+    message: 'Password must be provided'
+  }
+]
+%>
+<%=
+describe_sub_object 'The Validation Error Object', json: validation_error_object, html_id: 'the-plugin-settings-configuration-object' do
+  key     'String',  'The name of configuration key that has an error.'
+  message 'String',  'The error message associated with that key.'
+end
+%>
+
+<%
+
+verify_connection_error_object = [
+  {
+    key: '',
+    message: 'Failed to authenticate `ManagerDN`.'
+  }
+]
+%>
+
+<%=
+describe_sub_object 'The Verify Connection Error Object', json: verify_connection_error_object, html_id: 'the-verify-connection-error-object' do
+  key     'String',  'Empty string.'
+  message 'String',  'Connection check failure message.'
+end
+%>

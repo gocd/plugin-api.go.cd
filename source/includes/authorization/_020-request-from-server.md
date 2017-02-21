@@ -19,6 +19,6 @@ If a plugin supports search, the following message must be implemented in order 
 
 * [Search user](#search-users)
 
-Nice to have,
+Nice to have
 
 * [Verify Connection](#verify-connection)

@@ -8,7 +8,7 @@ This message allows a plugin to query the server for a list of Role Configuratio
 
 <p class='request-body-heading'>Request body</p>
 
-The body must contain a `auth_config_id` for which plugin inquired role config. 
+The body must contain a `auth_config_id` for which plugin inquired role config.
 
 > An example request body
 
@@ -47,8 +47,7 @@ The response body will contain a JSON array of `Role` with following elements
 
 <p class='attributes-table-follows'></p>
 
-| Key             | Type      | Description |
-| --------------- | --------- | ----------- |
-| `name`          | `String`  |  Name of `<pluginRole>` |
-| `configuration` | `String`  |  Configuration for `<pluginRole>` |
-
+| Key             | Type     | Description                      |
+|-----------------|----------|----------------------------------|
+| `name`          | `String` | Name of `<pluginRole>`           |
+| `configuration` | `String` | Configuration for `<pluginRole>` |

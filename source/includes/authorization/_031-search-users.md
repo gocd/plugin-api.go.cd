@@ -1,6 +1,6 @@
 ## Search users
 
-If a plugin supports search, this message must be implemented in order to serve search request from server.
+If a plugin supports search, this message must be implemented in order for GoCD users to search for users in external authorization systems.
 
 <p class='request-name-heading'>Request name</p>
 
@@ -14,22 +14,24 @@ If a plugin supports search, this message must be implemented in order to serve 
 {
   "search_term": "queried string",
   "profiles": {
-      "foo-ldap": {
-        "Url": "ldap://foo.url"
-      },
-      "bar-ldap": {
-        "Url": "ldap://bar.url"
-      }
+    "foo-ldap": {
+      "Url": "ldap://foo.url"
+    },
+    "bar-ldap": {
+      "Url": "ldap://bar.url"
     }
+  }
 }
 ```
+
 <p class='attributes-table-follows'></p>
 
 The request body will contain the following JSON elements:
 
-| Key           | Type      | Description |
-| ------------- | --------- | ----------- |
-| `search_term` | `String`  | Query string which user have searched from GoCD server. |
+| Key           | Type     | Description                            |
+|---------------|----------|----------------------------------------|
+| `search_term` | `String` | The search string entered by the user. |
+| `profiles`    | `Object` | This key contains list of `<authconfig>` configured for plugin. |
 
 <p class='response-code-heading'>Response code</p>
 
@@ -63,4 +65,3 @@ Plugin should respond with JSON array of users and each user must have following
 | `username`     | `String`  | `username` of user which has to be unique  across user base. |
 | `display_name` | `String`  | `display_name` of user which gets displayed on GoCD  server. If `display_name` is not provided then `username` will be displayed. |
 | `email_id`     | `String`  | `email_id` of user |
-
