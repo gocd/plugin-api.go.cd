@@ -158,3 +158,17 @@ If you're familiar with http request/responses handled by a web application, you
 ### The plugin dependencies
 
 Any dependencies that your plugin requires, should go into the `lib` directory inside the plugin JAR.
+
+## Logging for plugins
+
+Every plugin is provided with a `com.thoughtworks.go.plugin.api.logging.Logger` that can be used by the plugins. 
+
+Each plugin will have a separate log file corresponding to it. The log file name is of the format **plugin-plugin-id.log**. The plugin log files will be in the same directory as the GoCD server log.
+
+The default logging level for the plugin is set to INFO. Users can override the default value by setting system property `plugin.pluginId_placeholder.log.level` to the required logging level. For example, to set the logging level to WARN for plugin with id `yum-poller`, system property `plugin.yum-poller.log.level` should be set to WARN for GoCD server .
+
+For usage, look at the javadocs for `com.thoughtworks.go.plugin.api.logging.Logger` available on [Maven Central](https://search.maven.org/#search%7Cga%7C1%7Cgo-plugin-api)
+
+## Javadocs
+
+Javadocs associated with the available versions of go-plugin-api jar can be found on [Maven Central](https://search.maven.org/#search%7Cga%7C1%7Cgo-plugin-api).
