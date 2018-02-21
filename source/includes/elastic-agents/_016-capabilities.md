@@ -16,7 +16,7 @@ Server sends request with `Empty` request body.
 
 ```json
 {
-  "supports_status_report": "true"
+  "supports_status_report": true
 }
 ```
 
@@ -26,7 +26,7 @@ The response body will contain the following JSON elements:
 
 | Key                      | Type      | Description                                                                             |
 |--------------------------|-----------|-----------------------------------------------------------------------------------------|
-| `supports_status_report` | `String`  |  Whether plugin supports status [Agent status report](#agent-status-report) and [Plugin status report](#plugin-status-report) or not, depends on this `boolean` value |
+| `supports_status_report` | `String`  |  Whether plugin supports status [Agent status report](#get-agent-status-report) and [Plugin status report](#get-plugin-status-report) or not, depends on this `boolean` value |
 
 
 The plugin is expected to return status `200` if it can understand the request.

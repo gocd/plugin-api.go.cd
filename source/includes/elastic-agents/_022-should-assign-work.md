@@ -48,16 +48,25 @@ This allows plugin to decide if proposed agent is suitable to schedule a job on 
 
 ```json
 {
-  "environment": "staging",
   "agent": {
     "agent_id": "i-283432d4",
     "agent_state": "Idle",
     "build_state": "Idle",
     "config_state": "Enabled"
   },
+  "environment": "staging",
+  "job_identifier": {
+    "job_id": 100,
+    "job_name": "run-upgrade",
+    "pipeline_counter": 1,
+    "pipeline_label": "build",
+    "pipeline_name": "build",
+    "stage_counter": "1",
+    "stage_name": "test-stage"
+  },
   "properties": {
     "ami-id": "ami-6ac7408f",
-    "region" : "us-east-1"
+    "region": "us-east-1"
   }
 }
 ```
@@ -71,6 +80,7 @@ The request body will contain the following JSON elements:
 | `environment`       | `String` | The `environment` that this job belongs to. See the [environments section](https://docs.gocd.org/current/introduction/concepts_in_go.html#environment) to know more about environments. |
 | `agent`             | `Object` | An object describing the [elastic agent](#elastic-agent-object). |
 | `properties`        | `Object` | Jobs that require elastic agents, will have an `elasticPluginId` attribute on it, which refers to elastic `<profile/>` element. This object represents the key value pairs from the `<profile/>` element. |
+| `job_identifier`    | `Object` | Job identifier of the job for which this call is being made. |
 
 <p class='response-code-heading'>Response code</p>
 
