@@ -5,6 +5,7 @@ In order to implement an elastic agent extension point the following messages mu
 * [Create Agent](#create-agent)
 * [Should Assign Work](#should-assign-work)
 * [Server Ping](#server-ping)
+* [Capabilities](#get-plugin-capabilities)
 
 These are general purpose messages that a plugin must implement to allow users to configure the plugin through the browser.
 
@@ -18,3 +19,8 @@ These are messages that a plugin must implement in order to allow users to confi
 * [Validate Profile](#validate-profile)
 * [Get Profile View](#get-profile-view)
 * [Get Profile Metadata](#get-profile-metadata)
+
+If a plugin supports supports status reports, apart from the above, the plugin must implement the following messages. The plugin should use the `supports_status_report` [capability](#get-plugin-capabilities) to expose this feature.
+
+* [Agent Status Report](#get-agent-status-report)
+* [Plugin Status Report](#get-plugin-status-report)

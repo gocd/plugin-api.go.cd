@@ -1,0 +1,58 @@
+## Get agent status report
+
+If plugin supports status report, this message must be implement to provide status of an elastic agent. The purpose of this
+call is provide detailed information elastic agent current state.
+
+<p class='request-name-heading'>Request name</p>
+
+`go.cd.elastic-agent.agent-status-report`
+
+<p class='request-body-heading'>Request body</p>
+
+> An example request body for a docker plugin
+
+```json
+{
+  "job_identifier": {
+    "pipeline_name": "test-pipeline",
+    "pipeline_label": "Test Pipeline",
+    "pipeline_counter": 1,
+    "stage_name": "test-stage",
+    "stage_counter": "1",
+    "job_name": "test-job",
+    "job_id": 100
+  },
+  "elastic_agent_id": "46d7aa499c9f44958e118ffb7f975c52"
+}
+```
+
+The request body will contain the following JSON elements:
+
+<p class='attributes-table-follows'></p>
+
+| Key                 | Type     | Description                                                                                                    |
+|---------------------|----------|----------------------------------------------------------------------------------------------------------------|
+| `job_identifier`    | `Object` | This key contains the job identifier information for which user has requested status report.                   |
+| `elastic_agent_id`  | `String` | This key contains the elastic agent id, this is available only when agent is registered with GoCD server.      |
+
+<p class='response-code-heading'>Response code</p>
+
+The plugin is expected to return status `200` JSON object of view and in following format.
+
+<p class='response-body-heading'>Response Body</p>
+
+> An example response body
+
+```json
+{
+  "view": "status-report-html-view"
+}
+```
+
+The request body will contain the following JSON elements:
+
+<p class='attributes-table-follows'></p>
+
+| Key       | Type     | Description                                                                                  |
+|-----------|----------|----------------------------------------------------------------------------------------------|
+| `view`    | `String` | Agent status report view html. GoCD server will render this view as a agent status report.   |
