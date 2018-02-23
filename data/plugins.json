@@ -1,0 +1,33 @@
+{
+  "elastic-agents": {
+    "current": "1.0",
+    "all_versions": [
+      "1.0"
+    ]
+  },
+  "authorization": {
+    "current": "1.0",
+    "all_versions": [
+      "1.0"
+    ]
+  },
+  "config-repo": {
+    "current": "1.0",
+    "all_versions": [
+      "1.0"
+    ]
+  },
+  "notifications": {
+    "current": "2.0",
+    "all_versions": [
+      "2.0",
+      "1.0"
+    ]
+  },
+  "tasks": {
+    "current": "1.0",
+    "all_versions": [
+      "1.0"
+    ]
+  }
+}

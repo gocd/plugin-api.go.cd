@@ -1,14 +1,15 @@
 # Introduction
 
-Welcome to the GoCD Plugin API! You can use this API to implement GoCD plugins for
-SCMs,
-[tasks](tasks),
-[notifications](notifications),
-authentication,
-package repositories,
-[elastic agents](elastic-agents),
-[authorization](authorization) and
-[config repositories](config-repo).
+Welcome to the GoCD Plugin API! You can use this API to implement GoCD plugins for -
+
+- SCMs,
+- [tasks](tasks)
+- [notifications](notifications)
+- authentication
+- package repositories
+- [elastic agents](elastic-agents)
+- [authorization](authorization)
+- [config repositories](config-repo)
 
 Plugins, as the name implies, help in extending the functionality of GoCD. GoCD publishes a list of extension points for
 which plugins can be provided. An extension point published by the GoCD - defines the interface and the lifecycle that
