@@ -23,7 +23,7 @@ blockquote + .highlight {
 
 
 .version-switcher {
-  padding: 0 15px 0 15px;
+  padding: 5px 15px;
   width: 100%;
   span {
     color: #fff;
@@ -96,4 +96,23 @@ blockquote + .highlight {
   display: inline-block;
   background-color: $main-bg;
   margin-right: inherit;
+}
+
+select.version {
+  width:      170px;
+  height:     30px;
+  background: transparent;
+  color:      #fff;
+}
+
+span.version-label {
+  color:       #a5a5a5;
+  font-weight: normal;
+}
+
+span.one-version:before {
+  content:       ":";
+  color:         #a5a5a5;
+  padding-right: 5px;
+  margin-left:   -2px;
 }

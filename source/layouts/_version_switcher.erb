@@ -1,0 +1,6 @@
+<% if defined?(current_page_info[:extension_type]) && current_page_info[:extension_type] %>
+  <div class="version-switcher">
+    <span class="version-label">API version</span>
+    <%= version_select_dropdown %>
+  </div>
+<% end %>
