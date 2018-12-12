@@ -3,7 +3,6 @@
 In order to implement config repository extension point the following message must be implemented by the plugin.
 
 * [Parse directory](#parse-directory)
-* [Pipeline export](#pipeline-export)
 
 These are general purpose messages that a plugin may implement to allow users to configure the plugin through the browser.
 

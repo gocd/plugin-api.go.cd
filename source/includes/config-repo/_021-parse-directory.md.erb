@@ -40,7 +40,7 @@ been defined in the external configuration.
 }
 ```
 
-The request body will contain a JSON object with an attribute `directory`, which points to a local checkout of the specified
+The request body will contain a JSON with an attribute `directory`, which points to a local checkout of the specified
 material repository. It will also contain an attribute `configuration` which contains the specified configuration. Note:
 This is not the configuration in the plugin settings page.
 
@@ -48,7 +48,7 @@ This is not the configuration in the plugin settings page.
 
 The plugin is expected to return status `200` if it can understand the request.
 
-<p class='response-body-heading'>Response body</p>
+<p class='response-body-heading'>Response Body</p>
 
 > An example response body of a problematic config:
 

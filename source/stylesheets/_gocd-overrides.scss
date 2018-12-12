@@ -64,7 +64,7 @@ blockquote + .highlight {
   @extend %left-col;
 }
 
-.available-since, .request-name-heading, .request-body-heading, .response-code-heading, .response-body-heading, .response-headers-heading, .response-example-heading {
+.available-since, .request-name-heading, .request-body-heading, .response-code-heading, .response-body-heading {
   @extend %heading-like;
 }
 
