@@ -1,0 +1,20 @@
+## Changes in 19.2.0
+
+### Added
+
+- This version adds support for v2 for [Config repositories](config-repo). v2 of Config repositories adds the following support,
+ - [Parse Content](config-repo#parse-content) 
+ - [Pipeline Export](config-repo#pipeline-export) 
+ - [Pugin Icon](config-repo#get-plugin-icon) 
+ - [Plugin Capabilities](config-repo#get-plugin-capabilities) 
+
+### Removed
+
+No removals this release.
+
+### Deprecations
+
+- The elastic agent plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the elastic agent plugin api to allow adding support for job completion request. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.
+- The notification plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the notification plugin api.
+- The analytics plugin extension version 1 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 2 of the analytics plugin api.
+- The Get Server Info processor version 1 has been deprecated. This version will be removed in a release scheduled for April 2019. Plugin developers should use version 2 of the Get Server Info processor.

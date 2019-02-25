@@ -8,6 +8,7 @@ toc_footers:
 
 includes:
   - introduction
+  - changelog
 
 search: true
 ---
