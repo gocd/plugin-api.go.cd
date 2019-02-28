@@ -1,26 +1,30 @@
 ## Changes in 19.2.0
 
-### Added
+<h3 class="changelog-header">Added</h3>
 
-- This version adds support for v2 for [Config repositories](config-repo). v2 of Config repositories adds the following support,
+### Config repositories
+- This version adds support for v2 for [Config repositories](config-repo). v2 of Config repositories adds the following new messages,
  - [Parse Content](config-repo#parse-content) 
  - [Pipeline Export](config-repo#pipeline-export) 
  - [Plugin Icon](config-repo#get-plugin-icon)
  - [Plugin Capabilities](config-repo#get-plugin-capabilities)
 
-- This version adds support for v2 for [Authorization Extension](authorization). v2 of authorization extension adds the following messages,
- - [Capabilities](authorization#get-plugin-capabilities)
+### Authorization
+- This version adds support for v2 for [Authorization Extension](authorization). v2 of authorization extension adds the following new messages,
  - [Is Valid User](authorization#is-valid-user)
  - [Get User Roles](authorization#get-user-roles)
 
-### Removed
+Plugins [Capabilities](authorization#get-plugin-capabilities) message is enhanced to add a new capablity `can_get_user_roles`.
+
+<h3 class="changelog-header">Removed</h3>
 
 No removals this release.
 
-### Deprecations
+<h3 class="changelog-header">Deprecations</h3>
 
 - The elastic agent plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the elastic agent plugin api to allow adding support for job completion request. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.
 - The notification plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the notification plugin api.
 - The analytics plugin extension version 1 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 2 of the analytics plugin api.
 - The Get Server Info processor version 1 has been deprecated. This version will be removed in a release scheduled for April 2019. Plugin developers should use version 2 of the Get Server Info processor.
-- The authorization extension v1 has been deprecated. This version will be removed in a release scheduled for June 2019. Plugin developers should upgrade their plugins to the latest version.
+- The authorization extension v1 has been deprecated. This version will be removed in a release scheduled for September 2019. Plugin developers should upgrade their plugins to the latest version.
+- The config repositories extension v1 has been deprecated. This version will be removed in a release scheduled for September 2019. Plugin developers should upgrade their plugins to the latest version.
