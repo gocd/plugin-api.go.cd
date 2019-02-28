@@ -5,8 +5,13 @@
 - This version adds support for v2 for [Config repositories](config-repo). v2 of Config repositories adds the following support,
  - [Parse Content](config-repo#parse-content) 
  - [Pipeline Export](config-repo#pipeline-export) 
- - [Pugin Icon](config-repo#get-plugin-icon) 
- - [Plugin Capabilities](config-repo#get-plugin-capabilities) 
+ - [Plugin Icon](config-repo#get-plugin-icon)
+ - [Plugin Capabilities](config-repo#get-plugin-capabilities)
+
+- This version adds support for v2 for [Authorization Extension](authorization). v2 of authorization extension adds the following messages,
+ - [Capabilities](authorization#get-plugin-capabilities)
+ - [Is Valid User](authorization#is-valid-user)
+ - [Get User Roles](authorization#get-user-roles)
 
 ### Removed
 
@@ -18,3 +23,4 @@ No removals this release.
 - The notification plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the notification plugin api.
 - The analytics plugin extension version 1 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 2 of the analytics plugin api.
 - The Get Server Info processor version 1 has been deprecated. This version will be removed in a release scheduled for April 2019. Plugin developers should use version 2 of the Get Server Info processor.
+- The authorization extension v1 has been deprecated. This version will be removed in a release scheduled for June 2019. Plugin developers should upgrade their plugins to the latest version.
