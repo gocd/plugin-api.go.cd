@@ -93,6 +93,7 @@ The plugin is expected to return status `200` if it can understand the request.
     {
       "name": "pipeline1",
       "group": "group1",
+      "display_order_weight": 10,
       "label_template": "labelTemplate1",
       "lock_behavior": "lockOnFailure",
       "tracking_tool": {
@@ -442,6 +443,8 @@ mandatory. Some noteworthy properties of this element are:
 
     - Most top-level attributes of a pipeline *can* have a `location` defined. If defined, that value will be used to
       show more meaningful error messages, if the GoCD server detects errors during its parsing and validation.
+
+    - The `display_order_weight` property will be used to decide the order in which the pipelines will be shown on the GoCD dashboard.
 
     - See this note about the [special material type: `configrepo`](#the-special-material-type-configrepo).
 
