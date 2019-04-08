@@ -26,14 +26,19 @@
     </script>
 
     <meta charset="UTF-8"><meta http-equiv="refresh" content="6;url=/current/">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   </head>
 <body>
 
 <h1>Welcome to Go Continuous Delivery Plugin API Documentation</h1>
 <style>
-  .paragraph {
-    font-size: 20px;
-  }
+ .paragraph {
+   font-size: 20px;
+ }
+
+ #links a {
+     display: block;
+ }
 </style>
 
 <p class="paragraph">
@@ -43,7 +48,7 @@
   <br>
 </p>
 
-<p class="paragraph">
+<p class="paragraph" id="links">
   <% versions.each do |version_data| -%>
     <% if version_data[:type] == 'latest' -%>
       <a href="current"><%= version_data[:version] %> (current)</a><br>
