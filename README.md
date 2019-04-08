@@ -1,4 +1,4 @@
-# Go CD API Documentation
+# GoCD API Documentation
 
 Checkout the live documentation at https://plugin-api.gocd.org
 
@@ -54,7 +54,7 @@ A lot of useful information like links to user documentation, design documentati
 
 ```plain
 Copyright 2008-2013 Concur Technologies, Inc.
-Copyright 2016 ThoughtWorks, Inc.
+Copyright 2019 ThoughtWorks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
