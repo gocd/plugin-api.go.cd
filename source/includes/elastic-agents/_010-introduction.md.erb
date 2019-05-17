@@ -44,10 +44,11 @@ the server for the next job to run.
 3. Once the agent finishes running that job, it goes back into the idle agent pool, waiting for another,
    [suitable](#glossary-suitable) job to be scheduled and assigned to it.
 
-See the image below to help make this a little more clear.
+Watch the video linked below to help make this a little more clear.
 
-<div class='image-object' data="<%= asset_path :images, 'elastic-agents/normal-agent-job-assignment.svg' %>" type="image/svg+xml">
-</div>
+<a href="https://drive.google.com/a/thoughtworks.com/file/d/1kUMOqhifJYsMLz-rQ5m7vYFbg41mXcHb/view?usp=sharing" target="_blank">
+  <%= image_tag 'elastic-agents/normal-agent-job-assignment.png', {:title => "Job assignment with normal agents", :alt => "Job assignment with normal agents"} %>
+</a>
 
 ## Process of handling elastic agents
 
@@ -154,45 +155,10 @@ The plugin decides whether to assign an agent to a job, or to start another agen
 </table>
 </div>
 
-See this image to help make this a little more clear.
+See the video linked below to help make this a little more clear.
 
-<div class='image-object' data="<%= asset_path :images, 'elastic-agents/new-job-assignment.svg' %>" type="image/svg+xml">
-  <aside style="display: none;" class="warning"><strong>Important:</strong> This animation is not visible in chrome. Please use firefox instead.</aside>
-</div>
-
-<script>
-$(function() {
-  var showAnimationWarning = function(i, elem) {
-    var template = '<aside class="warning">This animation is not visible in chrome. Please use firefox instead.</aside>';
-    $(elem).replaceWith($(template));
-  }
-
-  var showAnimation = function(i, elem) {
-    var newElem = document.createElement('object')
-    $(elem).append($(newElem).attr({
-      data: $(elem).attr('data'),
-      type: 'image/svg+xml'
-    }))
-  }
-
-  var isChromium = window.chrome,
-      winNav = window.navigator,
-      vendorName = winNav.vendor,
-      isOpera = winNav.userAgent.indexOf("OPR") > -1,
-      isIEedge = winNav.userAgent.indexOf("Edge") > -1,
-      isIOSChrome = winNav.userAgent.match("CriOS");
-
-  if(isIOSChrome){
-     // is Google Chrome on IOS
-     $('.image-object').each(showAnimationWarning);
-  } else if(isChromium !== null && isChromium !== undefined && vendorName === "Google Inc." && isOpera == false && isIEedge == false) {
-     // is Google Chrome
-     $('.image-object').each(showAnimationWarning);
-  } else {
-     // not Google Chrome
-     $('.image-object').each(showAnimation);
-  }
-});
-</script>
+<a href="https://drive.google.com/a/thoughtworks.com/file/d/1dv7uql2bsG9BdbPwecQReDm3tcqqLRyV/view?usp=sharing" target="_blank">
+  <%= image_tag 'elastic-agents/new-job-assignment.png', {:title => "Job assignment with elastic agents", :alt => "Job assignment with elastic agents"} %>
+</a>
 
 <%= partial 'includes/shared/plugin-structure.md.erb', locals: { plugin_class: 'DockerElasticAgentPlugin', plugin_type: 'elastic-agent', endpoint_version: '1.0', minimum_version: '16.8.0' } %>
