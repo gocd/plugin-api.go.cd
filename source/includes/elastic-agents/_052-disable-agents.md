@@ -19,7 +19,7 @@ public class DockerPlugin implements GoPlugin {
   }
 
   public GoPluginIdentifier pluginIdentifier() {
-    return new GoPluginIdentifier("elastic-agent", Arrays.asList("1.0"))
+    return new GoPluginIdentifier("elastic-agent", Arrays.asList("5.0"))
   }
 
   private disableAgents(List agents) {

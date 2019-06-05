@@ -1,0 +1,102 @@
+<h2 id="log-messages-to-job-console">Log Messages to Job Console</h2>
+
+```java
+import com.thoughtworks.go.plugin.api.*;
+import com.thoughtworks.go.plugin.api.annotation.Extension;
+import com.thoughtworks.go.plugin.api.logging.Logger;
+import com.thoughtworks.go.plugin.api.request.*;
+import com.thoughtworks.go.plugin.api.response.*;
+import com.google.gson.Gson;
+import java.util.*;
+
+@Extension
+public class <%= plugin_class %> implements GoPlugin {
+  private GoApplicationAccessor accessor;
+  public static final Logger LOG = Logger.getLoggerFor(<%= plugin_class %>.class);
+
+  public void initializeGoApplicationAccessor(GoApplicationAccessor accessor) {
+    this.accessor = accessor;
+  }
+
+  public GoPluginIdentifier pluginIdentifier() {
+    return new GoPluginIdentifier("<%= plugin_type %>", Arrays.asList("<%= endpoint_version %>"));
+  }
+
+  private void appendToConsoleLog(String text) throws ServerRequestFailedException {
+    Map<String, String> requestMap = new HashMap<>();
+    requestMap.put("pipelineName", "my_pipeline_1");
+    requestMap.put("pipelineCounter", "123");
+    requestMap.put("stageName", "stage1");
+    requestMap.put("stageCounter", "1");
+    requestMap.put("jobName", "job1");
+    requestMap.put("text", text);
+
+    DefaultGoApiRequest request = new DefaultGoApiRequest("go.processor.console-log.append", "1.0", pluginIdentifier());
+    request.setRequestBody(new GsonBuilder().create().toJson(requestMap));
+
+    GoApiResponse response = accessor.submit(request);
+
+    if (response.responseCode() != 200) {
+      LOG.error("Failed to append console log for " + jobIdentifier.represent() + " with text: " + text);
+    }
+  }
+}
+```
+
+This message allows a plugin to add messages to be shown in the GoCD job console.
+
+<%= available_since('19.5.0') %>
+
+<p class='request-name-heading'>Request name</p>
+
+`go.processor.console-log.append`
+
+<p class='request-body-heading'>Request version</p>
+
+The request version must be set to `1.0`.
+
+<p class='request-body-heading'>Request body</p>
+
+> An example request body:
+
+```json
+{
+  "pipelineName": "my_pipeline_1",
+  "pipelineCounter": "123",
+  "stageName": "stage1",
+  "stageCounter": "1",
+  "jobName": "job1",
+  "text": "Message to show in console log."
+}
+```
+
+Must be a JSON object made up of JSON elements as described below:
+
+<p class='attributes-table-follows'></p>
+
+| Key               | Type     | Description                                            |
+| ----------------- | -------- | ------------------------------------------------------ |
+| `pipelineName`    | `String` | Name of the pipeline in which the job is.              |
+| `pipelineCounter` | `String` | The pipeline counter (run counter of the pipeline).    |
+| `stageName`       | `String` | Name of the stage the job is in.                       |
+| `stageCounter`    | `String` | The run counter of the stage.                          |
+| `jobName`         | `String` | The name of the job.                                   |
+| `text`            | `String` | The message to be shows in the console log of the job. |
+
+
+<p class='response-code-heading'>Response code</p>
+
+The server is expected to return status `200` if it could process the request. It is expected to return status `500` if it failed to process the request.
+
+<p class='response-body-heading'>Response Body</p>
+
+> An example response body for a failure:
+
+```json
+{
+  "message": "An error occurred ..."
+}
+```
+
+The server will respond with a single JSON object with an error message with the key `message`, if it is unable to process the request. If
+successful, the response body will be empty.
