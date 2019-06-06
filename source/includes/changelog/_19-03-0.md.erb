@@ -1,18 +1,21 @@
-## Changes in 19.3.0
+## Changes in GoCD 19.3.0
 
-<h3 class="changelog-header">Added</h3>
+### Elastic Agents (Additions)
 
-### Elastic Agents
-- We have released a new version v5 of the [Elastic Agents](elastic-agents) extension. It introduces a new feature of multi cluster.
+We have released a new version v5 of the [Elastic Agents](elastic-agents) extension. It introduces a new feature of multi cluster support.
 
-#### New messages
+The new messages added are:
+
  - [Get Cluster Status Report](elastic-agents#get-cluster-status-report)
  - [Get Cluster Profile View](elastic-agents#get-cluster-profile-view)
  - [Get Cluster Profile Metadata](elastic-agents#get-cluster-profile-metadata)
  - [Validate Cluster Profile](elastic-agents#validate-cluster-profile)
  - [Migrate Config](elastic-agents#migrate-config)
 
-#### Changes in existing message
+### Elastic Agents (Changes)
+
+Endpoints defined in previous versions of this API have been enhanced, in the new version:
+
  - [Create Agent](elastic-agents#create-agent)
  - [Should Assign Work](elastic-agents#should-assign-work)
  - [Server Ping](elastic-agents#server-ping)
@@ -22,11 +25,7 @@
  - [Get Cluster Status Report](elastic-agents#get-cluster-status-report)
  - [Plugin Status Report](elastic-agents#get-plugin-status-report)
 
-<h3 class="changelog-header">Removed</h3>
-
-No removals this release.
-
-<h3 class="changelog-header">Deprecations</h3>
+### Deprecations (across extensions)
 
 - The elastic agent plugin extension version 4 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.
 - The notification plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the notification plugin api.

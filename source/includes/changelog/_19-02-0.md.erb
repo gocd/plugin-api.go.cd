@@ -1,26 +1,24 @@
-## Changes in 19.2.0
+## Changes in GoCD 19.2.0
 
-<h3 class="changelog-header">Added</h3>
+### Config repositories (Additions)
 
-### Config repositories
-- This version adds support for v2 for [Config repositories](config-repo). v2 of Config repositories adds the following new messages,
- - [Parse Content](config-repo#parse-content) 
- - [Pipeline Export](config-repo#pipeline-export) 
- - [Plugin Icon](config-repo#get-plugin-icon)
- - [Plugin Capabilities](config-repo#get-plugin-capabilities)
+  - Supports version 2 of [Config repositories](config-repo) extension API. Version 2 adds the following new messages:
+    - [Parse Content](config-repo#parse-content)
+    - [Pipeline Export](config-repo#pipeline-export)
+    - [Plugin Icon](config-repo#get-plugin-icon)
+    - [Plugin Capabilities](config-repo#get-plugin-capabilities)
 
-### Authorization
-- This version adds support for v2 for [Authorization Extension](authorization). v2 of authorization extension adds the following new messages,
- - [Is Valid User](authorization#is-valid-user)
- - [Get User Roles](authorization#get-user-roles)
+### Authorization (Additions)
 
-Plugins [Capabilities](authorization#get-plugin-capabilities) message is enhanced to add a new capablity `can_get_user_roles`.
+  - Supports version 2 of [Authorization](authorization) extension API. Version 2 adds the following new messages:
+    - [Is Valid User](authorization#is-valid-user)
+    - [Get User Roles](authorization#get-user-roles)
 
-<h3 class="changelog-header">Removed</h3>
+### Authorization (Changes)
 
-No removals this release.
+  - Plugins [Capabilities](authorization#get-plugin-capabilities) message is enhanced to add a new capablity `can_get_user_roles`.
 
-<h3 class="changelog-header">Deprecations</h3>
+### Deprecations (across extensions)
 
 - The elastic agent plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the elastic agent plugin api to allow adding support for job completion request. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.
 - The notification plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the notification plugin api.
