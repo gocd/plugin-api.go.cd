@@ -101,7 +101,7 @@ GEM
       em-websocket (~> 0.5.1)
       middleman-core (>= 3.3)
       rack-livereload (~> 0.3.15)
-    middleman-sprockets (4.0.0)
+    middleman-sprockets (4.1.1)
       middleman-core (~> 4.0)
       sprockets (>= 3.0)
     middleman-syntax (2.1.0)
@@ -153,7 +153,7 @@ DEPENDENCIES
   middleman-autoprefixer (~> 2.10.1)
   middleman-gh-pages (~> 0.3.0)
   middleman-livereload (~> 3.4.0)
-  middleman-sprockets (~> 4.0.0)
+  middleman-sprockets (~> 4.1.1)
   middleman-syntax (~> 2.1.0)
   mime-types
   parallel
