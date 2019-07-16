@@ -16,7 +16,7 @@ This message must be implemented in order to validate the configuration. The plu
 }
 ```
 
-The request body will contain a configuration from secret configuration, for which validation would have been called.
+The request body will contain the JSON array with the keys and values that form the part of the Secret Configuration.
 
 <p class='response-code-heading'>Response code</p>
 
