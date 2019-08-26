@@ -17,7 +17,7 @@ All Authorization plugins should implement the following messages to support aut
 If a plugin supports web based authentication, apart from the above, the plugin must implement the following messages. The plugin should use the `supported_auth_type` [capability](#get-plugin-capabilities) to expose this feature.
 
 * [Fetch Access Token](#fetch-access-token)
-* [Get Authorization Server Redirect URL](#authorization-server-redirect-url)
+* [Get Authorization Server Redirect URL](#authorization-server-url)
 
 For a plugin to support authorization, the following messages must be implemented. The plugin should use the `can_authorize` [capability](#get-plugin-capabilities) to expose this feature.
 
