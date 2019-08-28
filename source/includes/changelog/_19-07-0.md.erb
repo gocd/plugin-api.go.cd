@@ -1,0 +1,8 @@
+## Changes in GoCD 19.7.0
+
+### Deprecations (across extensions)
+
+ - The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.
+ - The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.
+ - The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.
+ - The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.
