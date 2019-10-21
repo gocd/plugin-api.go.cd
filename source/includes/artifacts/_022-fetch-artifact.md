@@ -1,5 +1,14 @@
 ## Fetch Artifact
 
+This message is a request to the plugin to fetch an artifact from the specified artifact store.
+
+<p class='request-name-heading'>Request name</p>
+
+`cd.go.artifact.fetch-artifact`
+
+<p class='request-body-heading'>Request body</p>
+
+
 > Given the following config XML snippet —
 
 ```xml
@@ -81,14 +90,6 @@
   "agent_working_directory":"/Users/varshavs/gocd/agent/pipelines/build"
 }
 ```
-
-This message is a request to the plugin to fetch an artifact from the specified artifact store.
-
-<p class='request-name-heading'>Request name</p>
-
-`cd.go.artifact.fetch-artifact`
-
-<p class='request-body-heading'>Request body</p>
 
 The request body will contain the following JSON elements:
 
