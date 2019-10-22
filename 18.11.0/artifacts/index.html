@@ -137,7 +137,7 @@
 
 <h2 id="current-version">Current Version</h2>
 
-<p>This document is for version 1.0 (the latest) of the artifacts endpoint.</p>
+<p>This document is for version 2.0 (the latest) of the artifacts endpoint.</p>
 
 <h2 id="background">Background</h2>
 
@@ -347,6 +347,14 @@
 
 <h2 id="fetch-artifact">Fetch Artifact</h2>
 
+<p>This message is a request to the plugin to fetch an artifact from the specified artifact store.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">cd.go.artifact.fetch-artifact</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
 <blockquote>
 <p>Given the following config XML snippet —</p>
 </blockquote>
@@ -430,14 +438,6 @@
   </span><span class="nt">"agent_working_directory"</span><span class="p">:</span><span class="s2">"/Users/varshavs/gocd/agent/pipelines/build"</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
-
-<p>This message is a request to the plugin to fetch an artifact from the specified artifact store.</p>
-
-<p class='request-name-heading'>Request name</p>
-
-<p><code class="prettyprint">cd.go.artifact.fetch-artifact</code></p>
-
-<p class='request-body-heading'>Request body</p>
 
 <p>The request body will contain the following JSON elements:</p>
 
