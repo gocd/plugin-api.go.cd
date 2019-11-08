@@ -329,6 +329,42 @@
 
 <p>Any dependencies that your plugin requires, should go into the <code class="prettyprint">lib</code> directory inside the plugin JAR.</p>
 
+<h2 id="logging">Logging</h2>
+
+<p>Plugins can optionally log events to a log file. Plugin logging is supported by <code class="prettyprint">com.thoughtworks.go.plugin.api.logging.Logger</code> class, the Logger class should be available on including the <code class="prettyprint">go-plugin-api</code> dependency as mentioned earlier.</p>
+
+<blockquote>
+<p>An example for plugin logging:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">go</span><span class="o">.</span><span class="na">testplugin</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.logging.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConsoleOutNotificationPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">ConsoleOutNotificationPlugin</span><span class="o">);</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+
+  <span class="kd">public</span> <span class="nc">GoPluginApiResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">GoPluginApiRequest</span> <span class="n">request</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnhandledRequestTypeException</span> <span class="o">{</span>
+    <span class="no">LOG</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Request from server: "</span> <span class="o">+</span> <span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">());</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<h3 id="log-location">Log location</h3>
+
+<p>Each plugin will have a separate log file and the name of the log file will be in the format <code class="prettyprint">plugin-&lt;plugin_id&gt;.log</code>. The location of the plugin log file will be the same as the location of the GoCD server logs.</p>
+
+<h3 id="log-level">Log level</h3>
+
+<p>The default log level for a plugin is <code class="prettyprint">info</code>. The log level can be controlled using a Java system property which should be provided to the GoCD server.</p>
+
+<p>The system property to control the log level is specific to each plugin and is of the format <code class="prettyprint">plugin.&lt;plugin_id&gt;.log.level=&lt;log_level&gt;</code>. The log level can be either of <code class="prettyprint">info</code>, <code class="prettyprint">debug</code>, <code class="prettyprint">warn</code>, <code class="prettyprint">error</code>.</p>
+
 <h1 id="requests-from-the-gocd-server">Requests from the GoCD server</h1>
 
 <p>In order to implement the notification extension point the following messages must be implemented by the plugin.</p>
