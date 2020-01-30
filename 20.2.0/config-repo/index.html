@@ -1,0 +1,1644 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name ="description" content="Extend GoCD's functionality. Implement GoCD plugins for SCMs, tasks, notifications, authentication, package repositories, elastic agents and authorization." />
+    <meta name ="keywords" content="gocd plugins, plugins for gocd, extension points, open source gocd, open source continuous delivery" />
+    <link href="../images/gocd.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href="../images/gocd.png" rel="apple-touch-icon" type="image/png" size="192x192" />
+    <title>GoCD Config Repository Plugin API Reference</title>
+
+    <style>
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #f8f8f2;
+  background-color: #272822;
+}
+.highlight .err {
+  color: #272822;
+  background-color: #f92672;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #f4bf75;
+}
+.highlight .nt {
+  color: #f4bf75;
+}
+.highlight .o, .highlight .ow {
+  color: #f8f8f2;
+}
+.highlight .p, .highlight .pi {
+  color: #f8f8f2;
+}
+.highlight .gi {
+  color: #a6e22e;
+}
+.highlight .gd {
+  color: #f92672;
+}
+.highlight .gh {
+  color: #66d9ef;
+  background-color: #272822;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #ae81ff;
+}
+.highlight .kc {
+  color: #fd971f;
+}
+.highlight .kt {
+  color: #fd971f;
+}
+.highlight .kd {
+  color: #fd971f;
+}
+.highlight .s, .highlight .sa, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #a6e22e;
+}
+.highlight .sr {
+  color: #a1efe4;
+}
+.highlight .si {
+  color: #cc6633;
+}
+.highlight .se {
+  color: #cc6633;
+}
+.highlight .nn {
+  color: #f4bf75;
+}
+.highlight .nc {
+  color: #f4bf75;
+}
+.highlight .no {
+  color: #f4bf75;
+}
+.highlight .na {
+  color: #66d9ef;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #a6e22e;
+}
+.highlight .ss {
+  color: #a6e22e;
+}
+    </style>
+    <link href="../stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="../stylesheets/print.css" rel="stylesheet" media="print" />
+
+      <script src="../javascripts/all.js"></script>
+
+
+      <script>
+        $(function() {
+          setupLanguages([]);
+        });
+      </script>
+  </head>
+
+  <body class="config-repo config-repo_index" data-languages="[]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="../images/navbar.png" alt="Navbar" />
+      </span>
+    </a>
+    <div class="tocify-wrapper">
+      <a href="../"><img src="../images/logo.png" alt="Logo" /></a>
+        <div class="lang-selector">
+        </div>
+      <div class="version-switcher">
+        <span class="version-label">Switch version:</span>
+        <select class="version"></select>
+      </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      <div id="toc">
+      </div>
+        <ul class="toc-footer">
+            <li><a href='https://github.com/gocd/plugin-api.go.cd'>Edit this guide on GitHub</a></li>
+            <li><a href='https://api.gocd.org'>GoCD API Documentation</a></li>
+            <li><a href='https://docs.gocd.org'>GoCD User Documentation</a></li>
+        </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id="config-repositories">Config Repositories</h1>
+
+<h2 id="current-version">Current Version</h2>
+
+<p>This document is for version 2.0 of the Config Repositories endpoint.</p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>Config repository extension endpoint allows a plugin to externalize pipeline and environment configuration. This allows the configuration to be maintained and versioned outside of GoCD.</p>
+
+<h1 id="getting-started">Getting started</h1>
+
+<p>Plugins in GoCD are implemented in Java and packaged as a JAR file.</p>
+
+<h2 id="structure-of-a-gocd-plugin">Structure of a GoCD Plugin</h2>
+
+<blockquote>
+<p>A plugin for GoCD is a JAR file with the following structure:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight plaintext"><code>plugin.jar
+|
+|-- plugin.xml
+|-- com
+|   \-- example
+|       \-- go
+|           \-- testplugin
+|               \-- SimpleConfigRepositoryPlugin.class
+|               \-- x.class
+|               \-- y.class
+\-- lib
+    \-- dependency-1.jar
+    \-- dependency-2.jar
+</code></pre></div>
+
+<p>The plugin jar is a self contained-jar. It is expected to contain the following inside it:</p>
+
+<ul>
+<li><code class="prettyprint">plugin.xml</code> — The <a href="#the-plugin-metadata">metadata</a> of your plugin.</li>
+<li>The <a href="#the-plugin-extension-class">plugin extension class</a> (<code class="prettyprint">SimpleConfigRepositoryPlugin.class</code> in the example shown) and any other classes that form your plugin.</li>
+<li>Any optional <a href="#the-plugin-dependencies">dependencies</a> your plugin may requires (inside the <code class="prettyprint">lib</code>).</li>
+</ul>
+
+<p><a id='the-plugin-metadata'></a></p>
+
+<h3 id="the-plugin-metadata-plugin-xml">The plugin metadata <code class="prettyprint">plugin.xml</code></h3>
+
+<blockquote>
+<p>Here is an example <code class="prettyprint">plugin.xml</code>:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8" ?&gt;</span>
+<span class="c">&lt;!-- Your plugin id and version
+     of this XML document, the
+     version must be set to "1" --&gt;</span>
+<span class="nt">&lt;go-plugin</span>
+  <span class="na">id=</span><span class="s">"com.example.rocket.launcher"</span>
+  <span class="na">version=</span><span class="s">"1"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;about&gt;</span>
+    <span class="c">&lt;!-- The name of your plugin --&gt;</span>
+    <span class="nt">&lt;name&gt;</span>Launches rockets<span class="nt">&lt;/name&gt;</span>
+    <span class="c">&lt;!--  The version of your plugin --&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.0.1<span class="nt">&lt;/version&gt;</span>
+    <span class="c">&lt;!-- The minimum version of GoCD that this plugin requires --&gt;</span>
+    <span class="nt">&lt;target-go-version&gt;</span>16.8.0<span class="nt">&lt;/target-go-version&gt;</span>
+    <span class="c">&lt;!-- A longer description of your plugin  --&gt;</span>
+    <span class="nt">&lt;description&gt;</span>Launches rockets, spaceships and other things to a destination of your choice.<span class="nt">&lt;/description&gt;</span>
+
+    <span class="c">&lt;!-- Tell us who you are --&gt;</span>
+    <span class="nt">&lt;vendor&gt;</span>
+      <span class="nt">&lt;name&gt;</span>ACME Corp<span class="nt">&lt;/name&gt;</span>
+      <span class="nt">&lt;url&gt;</span>https://www.example.com<span class="nt">&lt;/url&gt;</span>
+    <span class="nt">&lt;/vendor&gt;</span>
+
+    <span class="c">&lt;!-- If this plugin only supports certain OSes --&gt;</span>
+    <span class="nt">&lt;target-os&gt;</span>
+      <span class="nt">&lt;value&gt;</span>Linux<span class="nt">&lt;/value&gt;</span>
+      <span class="nt">&lt;value&gt;</span>Windows<span class="nt">&lt;/value&gt;</span>
+    <span class="nt">&lt;/target-os&gt;</span>
+  <span class="nt">&lt;/about&gt;</span>
+<span class="nt">&lt;/go-plugin&gt;</span>
+</code></pre></div>
+
+<p>This is an XML file that should be present in the plugin jar file at the top level.</p>
+
+<p>You can find the XML Schema for the plugins in the  <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-api/src/main/resources/plugin-descriptor.xsd">main repository</a>.</p>
+
+<p><a name='the-plugin-extension-class'></a></p>
+
+<h3 id="the-plugin-extension-class">The plugin extension class</h3>
+
+<blockquote>
+<p>Add this to your maven <code class="prettyprint">pom.xml</code>:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>cd.go.plugin<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>go-plugin-api<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>20.2.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div>
+
+<p>In order to use the plugin extension class, you must add the following to your maven dependencies. If you&rsquo;re using <a href="https://gradle.org">gradle</a>, then use <code class="prettyprint">cd.go.plugin:go-plugin-api:20.2.0</code>. You can find the latest version of the plugin in <a href="http://mvnrepository.com/artifact/cd.go.plugin/go-plugin-api">maven central</a>.</p>
+
+<div style='clear: both;'></div>
+
+<blockquote>
+<p>An example plugin class implementation:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">go</span><span class="o">.</span><span class="na">testplugin</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.annotation.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.exceptions.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.request.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.response.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SimpleConfigRepositoryPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+
+  <span class="c1">// this method is executed once at startup</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initializeGoApplicationAccessor</span><span class="o">(</span><span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">accessor</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="c1">// a GoPluginIdentifier tells GoCD what kind of a plugin this is</span>
+  <span class="c1">// and what version(s) of the request/response API it supports</span>
+  <span class="kd">public</span> <span class="nc">GoPluginIdentifier</span> <span class="nf">pluginIdentifier</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">GoPluginIdentifier</span><span class="o">(</span><span class="s">"configrepo"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"1.0"</span><span class="o">))</span>
+  <span class="o">}</span>
+
+  <span class="c1">// handle the request and return a response</span>
+  <span class="c1">// the response is very much like a HTTP response —</span>
+  <span class="c1">// it has a status code, a response body and optional headers</span>
+  <span class="kd">public</span> <span class="nc">GoPluginApiResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">GoPluginApiRequest</span> <span class="n">request</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnhandledRequestTypeException</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"go.plugin-settings.get-view"</span><span class="o">))</span> <span class="o">{</span>
+      <span class="nc">String</span> <span class="n">viewHtml</span> <span class="o">=</span> <span class="n">read</span><span class="o">(</span><span class="n">getClass</span><span class="o">().</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="s">"/plugin-settings.template.html"</span><span class="o">));</span>
+      <span class="k">return</span> <span class="k">new</span> <span class="nf">DefaultGoPluginApiResponse</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="n">viewHtml</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"go.plugin-settings.validate-configuration"</span><span class="o">))</span> <span class="o">{</span>
+      <span class="nc">List</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">validate</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+      <span class="k">return</span> <span class="k">new</span> <span class="nf">DefaultGoPluginApiResponse</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">errors</span><span class="o">));</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nf">UnhandledRequestTypeException</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">());</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>The plugin extension class is a Java class that implements the <code class="prettyprint">GoPlugin</code> interface.</p>
+
+<p>The other types in the example are:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><a href="#requests-to-the-gocd-server"><code class="prettyprint">GoApplicationAccessor</code></a></td>
+<td>So that the plugin can make requests to the GoCD application to get additional information that is not provided by each request. For example, the plugin can ask for settings, credentials etc.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">GoPluginIdentifier</code></td>
+<td>Provides information about the type of plugin and the version of the request/response it supports.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">GoPluginApiRequest</code></td>
+<td>Represents the request message sent from GoCD to a plugin. The message will have a name and an optional JSON request body and the version of the extension.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">GoPluginApiResponse</code></td>
+<td>Represents the response message as a result of processing the <code class="prettyprint">GoPluginApiRequest</code>. Similar to <code class="prettyprint">GoPluginApiRequest</code>, the response will have a status code and an optional JSON response body.</td>
+</tr>
+</tbody></table>
+
+<p>If you&rsquo;re familiar with http request/responses handled by a web application, you will find this very familiar.</p>
+
+<aside class="notice">
+  GoCD has built in support for allowing plugins to enhance their capabilities in the future without having to break compatibility. This is achieved by ensuring that each extension-point and messages that is sent to the plugin is versioned.
+</aside>
+
+<p><a id='the-plugin-dependencies'></a></p>
+
+<h3 id="the-plugin-dependencies">The plugin dependencies</h3>
+
+<p>Any dependencies that your plugin requires, should go into the <code class="prettyprint">lib</code> directory inside the plugin JAR.</p>
+
+<h2 id="logging">Logging</h2>
+
+<p>Plugins can optionally log events to a log file. Plugin logging is supported by <code class="prettyprint">com.thoughtworks.go.plugin.api.logging.Logger</code> class, the Logger class should be available on including the <code class="prettyprint">go-plugin-api</code> dependency as mentioned earlier.</p>
+
+<blockquote>
+<p>An example for plugin logging:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">go</span><span class="o">.</span><span class="na">testplugin</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.logging.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SimpleConfigRepositoryPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">SimpleConfigRepositoryPlugin</span><span class="o">);</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+
+  <span class="kd">public</span> <span class="nc">GoPluginApiResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">GoPluginApiRequest</span> <span class="n">request</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnhandledRequestTypeException</span> <span class="o">{</span>
+    <span class="no">LOG</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Request from server: "</span> <span class="o">+</span> <span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">());</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<h3 id="log-location">Log location</h3>
+
+<p>Each plugin will have a separate log file and the name of the log file will be in the format <code class="prettyprint">plugin-&lt;plugin_id&gt;.log</code>. The location of the plugin log file will be the same as the location of the GoCD server logs.</p>
+
+<h3 id="log-level">Log level</h3>
+
+<p>The default log level for a plugin is <code class="prettyprint">info</code>. The log level can be controlled using a Java system property which should be provided to the GoCD server.</p>
+
+<p>The system property to control the log level is specific to each plugin and is of the format <code class="prettyprint">plugin.&lt;plugin_id&gt;.log.level=&lt;log_level&gt;</code>. The log level can be either of <code class="prettyprint">info</code>, <code class="prettyprint">debug</code>, <code class="prettyprint">warn</code>, <code class="prettyprint">error</code>.</p>
+
+<h1 id="requests-from-the-gocd-server">Requests from the GoCD server</h1>
+
+<p>In order to implement config repository extension point the following message must be implemented by the plugin.</p>
+
+<ul>
+<li><a href="#parse-directory">Parse directory</a></li>
+<li><a href="#parse-content">Parse content</a></li>
+<li><a href="#pipeline-export">Pipeline export</a></li>
+</ul>
+
+<p>These are general purpose messages that a plugin may implement to allow users to configure the plugin through the browser.</p>
+
+<ul>
+<li><a href="#get-settings-view">Get Settings View</a></li>
+<li><a href="#get-plugin-configuration">Get Plugin Configuration</a></li>
+<li><a href="#validate-plugin-configuration">Validate Plugin Configuration</a></li>
+</ul>
+
+<h2 id="parse-directory">Parse directory</h2>
+
+<p>This message is a request to the plugin to parse a directory containing files which represent pipeline
+configuration. GoCD will periodically check the configured material repository (git, svn, etc) and if it finds a new
+commit, will send this request to the plugin, so that it can parse the configuration and tell it which pipelines have
+been defined in the external configuration.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">parse-directory</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>Given the following config XML snippet —</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;config-repos&gt;</span>
+  <span class="nt">&lt;config-repo</span> <span class="na">pluginId=</span><span class="s">"your.plugin.id"</span> <span class="na">id=</span><span class="s">"some-unique-id"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;git</span> <span class="na">url=</span><span class="s">"https://some.repo"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;configuration&gt;</span>
+      <span class="nt">&lt;property&gt;</span>
+        <span class="nt">&lt;key&gt;</span>some.key<span class="nt">&lt;/key&gt;</span>
+        <span class="nt">&lt;value&gt;</span>some.value<span class="nt">&lt;/value&gt;</span>
+      <span class="nt">&lt;/property&gt;</span>
+    <span class="nt">&lt;/configuration&gt;</span>
+  <span class="nt">&lt;/config-repo&gt;</span>
+</code></pre></div>
+
+<blockquote>
+<p>The plugin will receive the following JSON body —</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"directory"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/absolute/path/to/directory/with/configs"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"configurations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"some.key"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"some.value"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The request body will contain a JSON object with an attribute <code class="prettyprint">directory</code>, which points to a local checkout of the specified
+material repository. It will also contain an attribute <code class="prettyprint">configuration</code> which contains the specified configuration. Note:
+This is not the configuration in the plugin settings page.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response body</p>
+
+<blockquote>
+<p>An example response body of a problematic config:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"target_version"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"environments"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+  </span><span class="nl">"pipelines"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+  </span><span class="nl">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.pipeline.json"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"There is an error here ..."</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<blockquote>
+<p>A full response, with environments and pipelines:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"target_version"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"environments"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"environmentName"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"environment_variables"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"env1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"val1"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"agents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"agent-uuid-1"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"agent-uuid-2"</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"pipelines"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"pipeline1"</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"pipelines"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pipeline1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"group"</span><span class="p">:</span><span class="w"> </span><span class="s2">"group1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"display_order_weight"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label_template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"labelTemplate1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"lock_behavior"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lockOnFailure"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"tracking_tool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"link"</span><span class="p">:</span><span class="w"> </span><span class="s2">"link"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"regex"</span><span class="p">:</span><span class="w"> </span><span class="s2">"regex"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"mingle"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"base_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"baseUrl"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"project_identifier"</span><span class="p">:</span><span class="w"> </span><span class="s2">"projectId"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"timer"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"spec"</span><span class="p">:</span><span class="w"> </span><span class="s2">"timerSpec"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"only_on_changes"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"environment_variables"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"key1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"value1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"param1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"value1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"materials"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"git"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gitrepo"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"branch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"feature12"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"shallow_clone"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"ignore"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+              </span><span class="s2">"externals"</span><span class="p">,</span><span class="w">
+              </span><span class="s2">"tools"</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"whitelist"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"destination"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dir1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"auto_update"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gitMaterial1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hg"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"repos/myhg"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"ignore"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+              </span><span class="s2">"externals"</span><span class="p">,</span><span class="w">
+              </span><span class="s2">"tools"</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"whitelist"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"destination"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dir1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"auto_update"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hgMaterial1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"p4"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"port"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10.18.3.102:1666"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pass1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"use_tickets"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"view"</span><span class="p">:</span><span class="w"> </span><span class="s2">"//depot/dev/src...          //anything/src/..."</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"ignore"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+              </span><span class="s2">"lib"</span><span class="p">,</span><span class="w">
+              </span><span class="s2">"tools"</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"whitelist"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"destination"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dir1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"auto_update"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"p4materialName"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"svn"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://svn"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pass1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"check_externals"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"ignore"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+              </span><span class="s2">"tools"</span><span class="p">,</span><span class="w">
+              </span><span class="s2">"lib"</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"whitelist"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"destination"</span><span class="p">:</span><span class="w"> </span><span class="s2">"destDir1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"auto_update"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"svnMaterial1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional location for errors"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tfs"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"url3"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user4"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"domain"</span><span class="p">:</span><span class="w"> </span><span class="s2">"example.com"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pass"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"project"</span><span class="p">:</span><span class="w"> </span><span class="s2">"projectDir"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"ignore"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+              </span><span class="s2">"tools"</span><span class="p">,</span><span class="w">
+              </span><span class="s2">"externals"</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"whitelist"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"destination"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dir1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"auto_update"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tfsMaterialName"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"package"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"package_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"package-id-in-bigger-config-xml"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"packageMaterialName"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"plugin"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"scm_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"someScmGitRepositoryId"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"destination"</span><span class="p">:</span><span class="w"> </span><span class="s2">"destinationDir"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"ignore"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+              </span><span class="s2">"dir1"</span><span class="p">,</span><span class="w">
+              </span><span class="s2">"dir2"</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"whitelist"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"myPluggableGit"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"plugin"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"plugin_configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"some-plugin-id"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"url"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"git@github.com:gocd/plugin-api.go.cd.git"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"encrypted_value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"encryptedValue1"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="nl">"destination"</span><span class="p">:</span><span class="w"> </span><span class="s2">"scmDestinationDir"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"ignore"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+              </span><span class="s2">"dir1"</span><span class="p">,</span><span class="w">
+              </span><span class="s2">"dir2"</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"whitelist"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"myNewPluggableGitDefinition"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dependency"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"pipeline"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pipeline2"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"stage"</span><span class="p">:</span><span class="w"> </span><span class="s2">"build"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pipe2"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"stages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"stage1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"fetch_materials"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"never_cleanup_artifacts"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"clean_working_directory"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"approval"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"manual"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+              </span><span class="s2">"user1"</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"roles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+              </span><span class="s2">"role1"</span><span class="w">
+            </span><span class="p">],</span><span class="w">
+            </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"environment_variables"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"key1"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"value1"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="nl">"jobs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"job1"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"environment_variables"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"key1"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"value1"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">],</span><span class="w">
+              </span><span class="nl">"tabs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tab1"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"path/to/file"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">],</span><span class="w">
+              </span><span class="nl">"resources"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="s2">"resource1"</span><span class="w">
+              </span><span class="p">],</span><span class="w">
+              </span><span class="nl">"artifacts"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"src1"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"destination"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dest1"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"build"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"src2"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"destination"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dest2"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"test"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">],</span><span class="w">
+              </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name1"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"target/file.xml"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"xpath"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string(//path/to/element)"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">],</span><span class="w">
+              </span><span class="nl">"elastic_profile_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"elasticProfile1"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"run_instance_count"</span><span class="p">:</span><span class="w"> </span><span class="s2">"all"</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w">
+              </span><span class="nl">"tasks"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"command1"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"working_directory"</span><span class="p">:</span><span class="w"> </span><span class="s2">"workDir1"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                    </span><span class="s2">"arg1"</span><span class="p">,</span><span class="w">
+                    </span><span class="s2">"arg2"</span><span class="w">
+                  </span><span class="p">],</span><span class="w">
+                  </span><span class="nl">"run_if"</span><span class="p">:</span><span class="w"> </span><span class="s2">"passed"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"on_cancel"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"plugin_configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pluginId"</span><span class="p">,</span><span class="w">
+                      </span><span class="nl">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"version1"</span><span class="p">,</span><span class="w">
+                      </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+                    </span><span class="p">},</span><span class="w">
+                    </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                      </span><span class="p">{</span><span class="w">
+                        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"key1"</span><span class="p">,</span><span class="w">
+                        </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"value1"</span><span class="p">,</span><span class="w">
+                        </span><span class="nl">"encrypted_value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"encryptedValue1"</span><span class="p">,</span><span class="w">
+                        </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+                      </span><span class="p">}</span><span class="w">
+                    </span><span class="p">],</span><span class="w">
+                    </span><span class="nl">"run_if"</span><span class="p">:</span><span class="w"> </span><span class="s2">"passed"</span><span class="p">,</span><span class="w">
+                    </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+                  </span><span class="p">},</span><span class="w">
+                  </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">],</span><span class="w">
+              </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">],</span><span class="w">
+          </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"template1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"optional: key to group errors by"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The plugin is expected to return a JSON object (corresponding to
+<a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/messages/ParseDirectoryResponseMessage.java">ParseDirectoryResponseMessage</a>
+with these top level attributes:</p>
+
+<h4 id="1-the-target_version-element">1. The <code class="prettyprint">target_version</code> element</h4>
+
+<p>The <code class="prettyprint">target_version</code> element should be set to 2 (static) for all new plugins. The change in the response based on
+changes in the value of <code class="prettyprint">target_version</code> are described below:</p>
+
+<table><thead>
+<tr>
+<th>Version change from &hellip;</th>
+<th>Change in schema</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>1 to 2</td>
+<td>The property <code class="prettyprint">enable_pipeline_locking</code> was changed to <code class="prettyprint">lock_behavior</code>. The old values of <code class="prettyprint">true</code> and <code class="prettyprint">false</code> in <code class="prettyprint">enable_pipeline_locking</code> were changed to <code class="prettyprint">lockOnFailure</code> and <code class="prettyprint">none</code> respectively in <code class="prettyprint">lock_behavior</code>. A new value of <code class="prettyprint">unlockWhenFinished</code> was introduced.</td>
+</tr>
+</tbody></table>
+
+<h4 id="2-the-environments-element">2. The <code class="prettyprint">environments</code> element</h4>
+
+<p>The <code class="prettyprint">environments</code> element is a list of environment objects (corresponding to
+<a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/CREnvironment.java">CREnvironment</a>)
+, each of which has a <code class="prettyprint">name</code>, <code class="prettyprint">environment_variables</code> (for the whole environment), <code class="prettyprint">agents</code> in this environment and the
+<code class="prettyprint">pipelines</code> in this environment.</p>
+
+<p>See example shown.</p>
+
+<h4 id="3-the-errors-element">3. The <code class="prettyprint">errors</code> element</h4>
+
+<p>If this list has any errors defined (corresponding to
+<a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/CRError.java">CRError</a>),
+the configuration will be considered invalid and the errors will be shown to the user in an appropriate manner.</p>
+
+<h4 id="4-the-pipelines-element">4. The <code class="prettyprint">pipelines</code> element</h4>
+
+<p>A fairly comprehensive response with a <code class="prettyprint">pipelines</code> element is shown in the example. Not all of the parts are
+mandatory. Some noteworthy properties of this element are:</p>
+
+<p>- This element corresponds to the <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/CRPipeline.java">CRPipeline</a> object in GoCD.</p>
+
+<p>- <code class="prettyprint">name</code> is mandatory (and should be unique across the GoCD server).</p>
+
+<p>- <code class="prettyprint">group</code> is mandatory. It is the pipeline group that this pipeline should be added to.</p>
+
+<p>- There should be at least one material and material names should be unique across the pipeline.</p>
+
+<p>- There should either be <code class="prettyprint">stages</code> defined or a <code class="prettyprint">template</code> to fetch stages from. Not both.</p>
+
+<p>- Environment variable names and parameter names should be unique across the pipeline.</p>
+
+<p>- The different kinds of materials are shown in the example. They correspond to these objects in the GoCD contract
+      part of the codebase:
+      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRGitMaterial.java">CRGitMaterial (git)</a>,
+      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRSvnMaterial.java">CRSvnMaterial (SVN)</a>,
+      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRP4Material.java">CRP4Material (P4)</a>,
+      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRHgMaterial.java">CRHgMaterial (Hg)</a>,
+      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRPackageMaterial.java">CRPackageMaterial (Package)</a>,
+      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRTfsMaterial.java">CRTfsMaterial (TFS)</a>,
+      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRDependencyMaterial.java">CRDependencyMaterial (Dependency)</a> and
+      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRPluggableScmMaterial.java">CRPluggableScmMaterial (SCM plugin)</a>.</p>
+
+<p>- Jobs cannot have both <code class="prettyprint">resources</code> and <code class="prettyprint">elastic_profile_id</code> defined. They can have one of them or neither define.</p>
+
+<p>- Most top-level attributes of a pipeline <em>can</em> have a <code class="prettyprint">location</code> defined. If defined, that value will be used to
+      show more meaningful error messages, if the GoCD server detects errors during its parsing and validation.</p>
+
+<p>- The <code class="prettyprint">display_order_weight</code> property will be used to decide the order in which the pipelines will be shown on the GoCD dashboard. If not provided, it defaults to <code class="prettyprint">-1</code>.</p>
+
+<p>- See this note about the <a href="#the-special-material-type-configrepo">special material type: <code class="prettyprint">configrepo</code></a>.</p>
+
+<h3 id="the-special-material-type-configrepo">The special material type: <code class="prettyprint">configrepo</code></h3>
+
+<blockquote>
+<p>Given this config repo XML:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;config-repos&gt;</span>
+   <span class="nt">&lt;config-repo</span> <span class="na">pluginId=</span><span class="s">"plugin.id"</span> <span class="na">id=</span><span class="s">"repo1"</span><span class="nt">&gt;</span>
+     <span class="nt">&lt;git</span> <span class="na">url=</span><span class="s">"https://your/config/repo"</span> <span class="na">branch=</span><span class="s">"something"</span> <span class="nt">/&gt;</span>
+   <span class="nt">&lt;/config-repo&gt;</span>
+<span class="nt">&lt;/config-repos&gt;</span>
+</code></pre></div>
+
+<blockquote>
+<p>Instead of using a material like this:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"materials"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://your/config/repo"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"branch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"something"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"git"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mygit"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<blockquote>
+<p>&hellip; you can use this:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"materials"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"configrepo"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mygit"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>If the type of a material is <code class="prettyprint">configrepo</code>, then the corresponding config repository&rsquo;s information will be used as that
+material. This allows the pipeline definition to not have to repeat the config repository&rsquo;s material information. This
+is most useful when the config repo definition and the rest of the source code are stored together.</p>
+
+<p>The GoCD server clones the material configuration of the current repository (<strong>as is in XML</strong>) and replaces <strong>name,
+destination and filters (whitelist/blacklist)</strong>. Then, it uses the modified clone in place of <code class="prettyprint">configrepo</code> material.</p>
+
+<h2 id="parse-content">Parse content</h2>
+
+<p>This message is a request to the plugin to parse the provided content containing one or more pipeline configurations. GoCD will send this request to the plugin in order to validate the pipeline configurations as part of a preflight check. It is very similar to the <a href="#parse-directory"><code class="prettyprint">parse-directory</code></a> request except that it is not dependent on an existing config repo or a specific directory of files.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">parse-content</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>Given this yaml content -</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight yaml"><code><span class="na">pipelines</span><span class="pi">:</span>
+  <span class="na">mypipeline</span><span class="pi">:</span>
+    <span class="na">group</span><span class="pi">:</span> <span class="s">simple</span>
+    <span class="na">materials</span><span class="pi">:</span>
+      <span class="na">mygit</span><span class="pi">:</span>
+        <span class="na">git</span><span class="pi">:</span> <span class="s">http://my.example.org/mygit.git</span>
+    <span class="na">stages</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">mystage</span><span class="pi">:</span>
+          <span class="na">jobs</span><span class="pi">:</span>
+            <span class="na">myjob</span><span class="pi">:</span>
+              <span class="na">tasks</span><span class="pi">:</span>
+               <span class="pi">-</span> <span class="na">exec</span><span class="pi">:</span>
+                   <span class="na">command</span><span class="pi">:</span> <span class="s">make</span>
+</code></pre></div>
+
+<blockquote>
+<p>The plugin will receive the following JSON body —</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"contents"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"build.gocd.yml"</span><span class="p">:</span><span class="w"> </span><span class="s2">"contents of build.gocd.yml"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"deploy.gocd.yml"</span><span class="p">:</span><span class="w"> </span><span class="s2">"contents of deploy.gocd.yml"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The request body will contain a JSON object with an attribute <code class="prettyprint">contents</code>, which contains a map of filenames and the content of each file.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response body</p>
+
+<p>The plugin is expected to return a JSON object (corresponding to
+<a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/messages/ParseDirectoryResponseMessage.java">ParseDirectoryResponseMessage</a>). Please reference to <a href="#parse-directory"><code class="prettyprint">parse-drectory</code></a> for details and examples of the response body.</p>
+
+<h2 id="pipeline-export">Pipeline export</h2>
+
+<p>This message is a request to the plugin to convert a pipeline configuration into the plugin&rsquo;s native format. It is
+essentially the reverse of the <a href="#parse-directory"><code class="prettyprint">parse-directory</code> request</a>.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">pipeline-export</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>Given the following config XML snippet (assume this pipeline is in a group named <code class="prettyprint">my-group</code>) —</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;pipeline</span> <span class="na">name=</span><span class="s">"my-pipeline"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;materials&gt;</span>
+    <span class="nt">&lt;git</span> <span class="na">url=</span><span class="s">"https://my.repo/path/to.git"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/materials&gt;</span>
+  <span class="nt">&lt;stage</span> <span class="na">name=</span><span class="s">"first-stage"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;jobs&gt;</span>
+      <span class="nt">&lt;job</span> <span class="na">name=</span><span class="s">"first-job"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;tasks&gt;</span>
+          <span class="nt">&lt;exec</span> <span class="na">command=</span><span class="s">"/bin/echo"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;arg&gt;</span>hello<span class="nt">&lt;/arg&gt;</span>
+            <span class="nt">&lt;runif</span> <span class="na">status=</span><span class="s">"passed"</span> <span class="nt">/&gt;</span>
+          <span class="nt">&lt;/exec&gt;</span>
+        <span class="nt">&lt;/tasks&gt;</span>
+      <span class="nt">&lt;/job&gt;</span>
+    <span class="nt">&lt;/jobs&gt;</span>
+  <span class="nt">&lt;/stage&gt;</span>
+<span class="nt">&lt;/pipeline&gt;</span>
+</code></pre></div>
+
+<p>The request body will contain a JSON object with an attribute <code class="prettyprint">pipeline</code>, which contains a JSON representation of a full pipeline configuration. For a more detailed example showing, see the <a href="#parse-directory"><code class="prettyprint">parse-directory</code> request body</a>.</p>
+
+<blockquote>
+<p>The plugin will receive the following JSON body —</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"pipeline"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"group"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my-group"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my-pipeline"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"label_template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"${COUNT}"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"lock_behavior"</span><span class="p">:</span><span class="w"> </span><span class="s2">"none"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"mingle"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"mql_grouping_conditions"</span><span class="p">:</span><span class="w"> </span><span class="s2">"</span><span class="se">\"\"</span><span class="s2">"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"environment_variables"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+    </span><span class="nl">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+    </span><span class="nl">"materials"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://my.repo/path/to.git"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"branch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"master"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"shallow_clone"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"ignore"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+          </span><span class="nl">"whitelist"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"auto_update"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"git"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="nl">"stages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"first-stage"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"fetch_materials"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"never_cleanup_artifacts"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"clean_working_directory"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"approval"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+          </span><span class="nl">"roles"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"environment_variables"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+        </span><span class="nl">"jobs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"first-job"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"environment_variables"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+            </span><span class="nl">"tabs"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+            </span><span class="nl">"resources"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+            </span><span class="nl">"artifacts"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+            </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+            </span><span class="nl">"run_instance_count"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"tasks"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+              </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/bin/echo"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="mf">-1.0</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                  </span><span class="s2">"hello"</span><span class="w">
+                </span><span class="p">],</span><span class="w">
+                </span><span class="nl">"run_if"</span><span class="p">:</span><span class="w"> </span><span class="s2">"passed"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"exec"</span><span class="w">
+              </span><span class="p">}</span><span class="w">
+            </span><span class="p">]</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<h3><!-- Force a break/clear --></h3>
+
+<p class="response-example-heading">Response example</p>
+
+<p>Here is an example response from the GoCD YAML Configuration Plugin:</p>
+
+<div class="highlight"><pre class="highlight http"><code><span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Type</span><span class="p">:</span> <span class="s">application/x-yaml; charset=utf-8</span>
+<span class="na">X-Export-Filename</span><span class="p">:</span> <span class="s">my-pipeline.gocd.yaml</span>
+
+{
+  "pipeline": "\"format_version: 3\\npipelines:\\n  my-pipeline:\\n    group: my-group\\n    label_template: ${COUNT}\\n    lock_behavior: none\\n    materials:\\n      git:\\n        git: https://my.repo/path/to.git\\n        shallow_clone: false\\n        auto_update: true\\n        branch: master\\n    stages:\\n    - first-stage:\\n        fetch_materials: true\\n        keep_artifacts: false\\n        clean_workspace: false\\n        approval:\\n          type: success\\n        jobs:\\n          first-job:\\n            tasks:\\n            - exec:\\n                arguments:\\n                - hello\\n                command: /bin/echo\\n                run_if: passed\\n\""
+}
+</code></pre></div>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response body</p>
+
+<p>The plugin is expected to return a JSON object (corresponding to
+<a href="https://github.com/gocd/gocd/blob/b8cbce628afca8b20726e5fbd81ebea1e20091fe/plugin-infra/go-plugin-access/src/main/java/com/thoughtworks/go/plugin/access/configrepo/v2/messages/PipelineExportResponseMessage.java"><code class="prettyprint">PipelineExportResponseMessage</code></a>. The response body contains a single attribute:</p>
+
+<h4 id="pipeline"><code class="prettyprint">pipeline</code></h4>
+
+<p>This <code class="prettyprint">pipeline</code> element is a string representation of the exported pipeline configuration in the native format supported by the plugin. The value of this element must deserialize to a <code class="prettyprint">string</code>.</p>
+
+<p class="response-headers-heading">Response headers</p>
+
+<p>The plugin response must also set the following headers:</p>
+
+<h4 id="content-type"><code class="prettyprint">Content-Type</code></h4>
+
+<p>Plugin responses are expected to provide a MIME type to indicate how to treat the content of the <code class="prettyprint">pipeline</code> attribute. Here are some examples of common MIME types:</p>
+
+<ul>
+<li><code class="prettyprint">text/plain; charset=utf-8</code></li>
+<li><code class="prettyprint">application/json; charset=utf-8</code></li>
+<li><code class="prettyprint">application/x-yaml; charset=utf-8</code></li>
+</ul>
+
+<h4 id="x-export-filename"><code class="prettyprint">X-Export-Filename</code></h4>
+
+<p>Plugin responses must also suggest a filename for the exported content. This is used by GoCD to construct a <code class="prettyprint">Content-Disposition</code> header for REST API responses.</p>
+
+<h2 id="get-settings-view">Get Settings View</h2>
+
+<p>This is an optional message that the plugin may implement, should users want to configure the plugin from the GoCD admin page.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.plugin-settings.get-view</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>A JSON <a href="#the-get-settings-view-object">settings view object</a></p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;div&gt;some html&lt;/div&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<h2 id="get-plugin-configuration">Get Plugin Configuration</h2>
+
+<p>This is an optional message that the plugin may implement, should users want to configure the plugin from the GoCD admin page. This message allows the server to query a plugin about what properties are supported by this plugin.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.plugin-settings.get-configuration</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>A JSON <a href="#the-plugin-settings-configuration-object">plugin settings configuration object</a>.</p>
+
+<h2 id="validate-plugin-configuration">Validate Plugin Configuration</h2>
+
+<p>If a plugin requires any configuration, this message must be implemented in order to validate the configuration.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.plugin-settings.validate-configuration</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An example validation request body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"plugin-settings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"server_url"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost.com"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The request body will contain a JSON with an attribute <code class="prettyprint">plugin-settings</code>, which contains an object with the configuration keys and values that the plugin is expected to validate.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>The plugin should respond with JSON array response for each configuration key that has a validation error</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+   </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"server_url"</span><span class="p">,</span><span class="w">
+   </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Server URL cannot be localhost"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+
+<p>If any of the input keys have a validation error on them, the plugin is expected to return a list of <a href="#the-validation-error-object">validation error objects</a>. If the configuration is valid, the plugin should return an empty JSON array.</p>
+
+<h2 id="get-plugin-icon">Get Plugin Icon</h2>
+
+<p>This call is expected to return the icon for the plugin, so as to make it easy for users to identify the plugin.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">get-icon</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>An example plugin response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"content_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/svg+xml"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PHN2ZyB2ZXJzaW9u..."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The plugin is expected to return an <a href="#the-image-object">image object</a>.</p>
+
+<aside class="notice">
+  <strong>It is recommended that:</strong>
+  <ul>
+    <li>The image be an SVG image, since it scales well. Using other types like PNG/JPEG/GIF/BMP will work too, but is not recommended.</li>
+    <li>The image be a square image.</li>
+    <li>The base-64 encoded data is &lt;= 100KB. Bigger sizes will work too, but may take a long time to render.</li>
+  </ul>
+</aside>
+
+<h2 id="get-plugin-capabilities">Get Plugin Capabilities</h2>
+
+<p>This message is a request to the plugin to provide plugin capabilities. Based on these capabilities GoCD would enable or disable the plugin features for a user.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">get-capabilities</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>Server sends request with <code class="prettyprint">Empty</code> request body.</p>
+
+<p class='response-code-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"supports_pipeline_export"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"supports_parse_content"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The response body will contain the following JSON attributes:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">supports_pipeline_export</code></td>
+<td><code class="prettyprint">boolean</code></td>
+<td>Whether this plugin supports the <a href="#pipeline-export"><code class="prettyprint">pipeline-export</code></a> request.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">supports_parse_content</code></td>
+<td><code class="prettyprint">boolean</code></td>
+<td>Whether this plugin supports the <a href="#parse-content"><code class="prettyprint">parse-content</code></a> request.</td>
+</tr>
+</tbody></table>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<h1 id="requests-to-the-gocd-server">Requests to the GoCD server</h1>
+
+<p>The plugin may make the following requests to the server using <code class="prettyprint">GoApplicationAccessor#submit(GoApiRequest)</code></p>
+
+<ul>
+<li><a href="#get-plugin-settings">Get Plugin Settings</a></li>
+</ul>
+
+<h2 id="get-plugin-settings">Get Plugin Settings</h2>
+
+<div class="highlight"><pre class="highlight java"><code><span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.annotation.Extension</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.logging.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.request.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.response.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SimpleConfigRepositoryPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">SimpleConfigRepositoryPlugin</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initializeGoApplicationAccessor</span><span class="o">(</span><span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">accessor</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="nc">GoPluginIdentifier</span> <span class="nf">pluginIdentifier</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">GoPluginIdentifier</span><span class="o">(</span><span class="s">"configrepo"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"1.0"</span><span class="o">))</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="nc">PluginSettings</span> <span class="nf">getSettings</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">Gson</span> <span class="n">gson</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Gson</span><span class="o">();</span>
+    <span class="c1">// create a request</span>
+    <span class="nc">DefaultGoApiRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DefaultGoApiRequest</span><span class="o">(</span>
+      <span class="s">"go.processor.plugin-settings.get"</span><span class="o">,</span>
+      <span class="s">"1.0"</span><span class="o">,</span>
+      <span class="n">pluginIdentifier</span><span class="o">()</span>
+    <span class="o">);</span>
+
+    <span class="c1">// set the request body</span>
+    <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"plugin-id"</span><span class="o">,</span> <span class="s">"com.example.rocket.launcher"</span><span class="o">);</span>
+    <span class="n">request</span><span class="o">.</span><span class="na">setRequestBody</span><span class="o">(</span><span class="n">gson</span><span class="o">.</span><span class="na">toJson</span><span class="o">(</span><span class="n">map</span><span class="o">));</span>
+
+    <span class="c1">// submit the request</span>
+    <span class="nc">GoApiResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">.</span><span class="na">submit</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+
+    <span class="c1">// check status</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">responseCode</span><span class="o">()</span> <span class="o">!=</span> <span class="mi">200</span><span class="o">)</span> <span class="o">{</span>
+      <span class="no">LOG</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"The server sent an unexpected status code "</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="na">responseCode</span><span class="o">()</span> <span class="o">+</span> <span class="s">" with the response body "</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="na">responseBody</span><span class="o">());</span>
+    <span class="o">}</span>
+
+    <span class="c1">// parse the response, using a json parser of your choice</span>
+    <span class="k">return</span> <span class="n">gson</span><span class="o">.</span><span class="na">fromJson</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">responseBody</span><span class="o">(),</span> <span class="nc">PluginSettings</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>This messages allows a plugin to query the server to get the user configured settings for this plugin.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.processor.plugin-settings.get</code></p>
+
+<p class='request-body-heading'>Request version</p>
+
+<p>The request version must be set to <code class="prettyprint">1.0</code>.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An example request body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"plugin-id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sample-plugin-id"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>Must be a JSON object with a key <code class="prettyprint">plugin-id</code> with the value being the ID of your plugin.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The server is expected to return status <code class="prettyprint">200</code> if it could process the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"server_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://build.go.cd"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"view"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The server will send a map of settings.</p>
+
+<h1 id="request-response-json-objects">Request/Response JSON Objects</h1>
+
+<p><a id='the-get-settings-view-object'></a></p>
+
+<h3 id="the-settings-view-object">The Settings View Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the settings view object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;div class=</span><span class="se">\"</span><span class="s2">form_item_block</span><span class="se">\"</span><span class="s2">&gt;...&lt;/div&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">template</code></td>
+<td>String</td>
+<td>A string containing an HTML AngularJS based view.</td>
+</tr>
+</tbody></table>
+
+<p>This template is an <a href="https://angularjs.org">AngularJS</a> based template.</p>
+
+<p>GoCD uses Angular JS as its template engine for the plugin UI. This allows plugin authors to use a limited set of AngularJS features to specify how the UI of their plugins looks.</p>
+
+<aside class='notice'>
+  <strong>Note:</strong> Some plugin endpoints, like the Package Repository plugin, do not use this for their view.
+</aside>
+
+<div style='clear: both;'></div>
+
+<h4 id="getting-started-with-angularjs-based-templates">Getting started with AngularJS based templates</h4>
+
+<blockquote>
+<p>Given a configuration:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;configuration&gt;</span>
+  <span class="nt">&lt;property&gt;</span>
+    <span class="nt">&lt;key&gt;</span>username<span class="nt">&lt;/key&gt;</span>
+    <span class="nt">&lt;value&gt;</span>alice<span class="nt">&lt;/username&gt;</span>
+  <span class="nt">&lt;/property&gt;</span>
+<span class="nt">&lt;/configuration&gt;</span>
+</code></pre></div>
+
+<blockquote>
+<p>This gets converted into the following JSON representation in the browser:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alice"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<blockquote>
+<p>The AngularJS template is expected to bind to the JSON object shown above:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form_item_block"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Username:<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">'asterix'</span><span class="nt">&gt;</span>*<span class="nt">&lt;/span&gt;&lt;/label&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">ng-model=</span><span class="s">"username"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div>
+
+<p>When an Angular template is used in a Go plugin, to define the configuration UI, the configuration key which is stored in the configuration XML is used everywhere and is expected to be consistent. Since Angular works off of JSON, GoCD will make sure that the key in the JSON provided to the Angular template is the same as the key in the configuration XML.</p>
+
+<p>Suppose the key of the configuration property stored in the XML is &ldquo;username&rdquo;, with value, &ldquo;alice&rdquo;, then Go will make sure that the value is available to the template as &ldquo;username&rdquo; when used in an Angular-specific HTML attribute like &ldquo;ng-model&rdquo;.</p>
+
+<p><img src="../images/plugin_angular.png" alt="Plugin Angular Architecture" /></p>
+
+<p>So, the name &ldquo;foobar&rdquo; needs to be the same across the configuration XML, the Angular template as well as in any code that the plugin has.</p>
+
+<div style='clear: both;'></div>
+
+<h4 id="showing-validation-errors-in-the-ui">Showing validation errors in the UI</h4>
+
+<blockquote>
+<p>We use some simple string replacement<br/>
+to substitute <code class="prettyprint">GOINPUTNAME</code> with a unique identifier<br/>
+for your plugin in order to render<br/>
+any server side errors</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form_item_block"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Username:<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">'asterix'</span><span class="nt">&gt;</span>*<span class="nt">&lt;/span&gt;&lt;/label&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">ng-model=</span><span class="s">"username"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"form_error"</span> <span class="na">ng-show=</span><span class="s">"GOINPUTNAME[username].$error.server"</span><span class="nt">&gt;</span>
+    {{ GOINPUTNAME[username].$error.server}}
+  <span class="nt">&lt;/span&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div>
+
+<p>In case of validation errors returned by <code class="prettyprint">go.plugin-settings.validate-configuration</code>, the error messages needs to be populated on the UI, use the snippet here to show the validation errors.</p>
+
+<p><a id='the-plugin-settings-configuration-object'></a></p>
+
+<h3 id="the-plugin-settings-configuration-object">The Plugin Settings Configuration Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the plugin settings configuration object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"server_url"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Server URL"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Username"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Password"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">display-name</code></td>
+<td>String</td>
+<td>The name of the property.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">default-value</code></td>
+<td>String</td>
+<td>The default value of the property.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">display-order</code></td>
+<td>String</td>
+<td>A string containing a numerical value.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">required</code></td>
+<td>Boolean</td>
+<td>If the field is mandatory.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">secure</code></td>
+<td>Boolean</td>
+<td>If the data in the field should be stored encrypted.</td>
+</tr>
+</tbody></table>
+
+<p><a id='the-plugin-settings-configuration-object'></a></p>
+
+<h3 id="the-validation-error-object">The Validation Error Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the validation error object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"email_address"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Email address is invalid"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Password must be provided"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">key</code></td>
+<td>String</td>
+<td>The name of configuration key that has an error.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">message</code></td>
+<td>String</td>
+<td>The error message associated with that key.</td>
+</tr>
+</tbody></table>
+
+<p><a id='the-image-object'></a></p>
+
+<h3 id="the-image-object">The Image Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the image object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"content_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/svg+xml"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="s2">"...."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">content_type</code></td>
+<td>String</td>
+<td>A valid <a href="http://www.iana.org/assignments/media-types/media-types.xhtml#image">content type</a> for the image. Please make sure the content type is supported by most browsers.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">data</code></td>
+<td>String</td>
+<td>A <a href="https://en.wikipedia.org/wiki/Base64">base-64</a> encoded (single-line non-chunking) byte array of the byte-sequence that composes the image.</td>
+</tr>
+</tbody></table>
+
+      </div>
+      <div class="dark-box">
+          <div class="lang-selector">
+          </div>
+      </div>
+    </div>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-48357651-2', 'auto');
+  ga('send', 'pageview');
+</script>
+  </body>
+</html>
