@@ -1,0 +1,1810 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name ="description" content="Extend GoCD's functionality. Implement GoCD plugins for SCMs, tasks, notifications, authentication, package repositories, elastic agents and authorization." />
+    <meta name ="keywords" content="gocd plugins, plugins for gocd, extension points, open source gocd, open source continuous delivery" />
+    <link href="../images/gocd.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href="../images/gocd.png" rel="apple-touch-icon" type="image/png" size="192x192" />
+    <title>GoCD Authorization Plugin API Reference</title>
+
+    <style>
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #f8f8f2;
+  background-color: #272822;
+}
+.highlight .err {
+  color: #272822;
+  background-color: #f92672;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #f4bf75;
+}
+.highlight .nt {
+  color: #f4bf75;
+}
+.highlight .o, .highlight .ow {
+  color: #f8f8f2;
+}
+.highlight .p, .highlight .pi {
+  color: #f8f8f2;
+}
+.highlight .gi {
+  color: #a6e22e;
+}
+.highlight .gd {
+  color: #f92672;
+}
+.highlight .gh {
+  color: #66d9ef;
+  background-color: #272822;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #ae81ff;
+}
+.highlight .kc {
+  color: #fd971f;
+}
+.highlight .kt {
+  color: #fd971f;
+}
+.highlight .kd {
+  color: #fd971f;
+}
+.highlight .s, .highlight .sa, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #a6e22e;
+}
+.highlight .sr {
+  color: #a1efe4;
+}
+.highlight .si {
+  color: #cc6633;
+}
+.highlight .se {
+  color: #cc6633;
+}
+.highlight .nn {
+  color: #f4bf75;
+}
+.highlight .nc {
+  color: #f4bf75;
+}
+.highlight .no {
+  color: #f4bf75;
+}
+.highlight .na {
+  color: #66d9ef;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #a6e22e;
+}
+.highlight .ss {
+  color: #a6e22e;
+}
+    </style>
+    <link href="../stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="../stylesheets/print.css" rel="stylesheet" media="print" />
+
+      <script src="../javascripts/all.js"></script>
+
+
+      <script>
+        $(function() {
+          setupLanguages([]);
+        });
+      </script>
+  </head>
+
+  <body class="authorization authorization_index" data-languages="[]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="../images/navbar.png" alt="Navbar" />
+      </span>
+    </a>
+    <div class="tocify-wrapper">
+      <a href="../"><img src="../images/logo.png" alt="Logo" /></a>
+        <div class="lang-selector">
+        </div>
+      <div class="version-switcher">
+        <span class="version-label">Switch version:</span>
+        <select class="version"></select>
+      </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      <div id="toc">
+      </div>
+        <ul class="toc-footer">
+            <li><a href='https://github.com/gocd/plugin-api.go.cd'>Edit this guide on GitHub</a></li>
+            <li><a href='https://api.gocd.org'>GoCD API Documentation</a></li>
+            <li><a href='https://docs.gocd.org'>GoCD User Documentation</a></li>
+        </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id="authorization-plugins">Authorization Plugins</h1>
+
+<h2 id="current-version">Current Version</h2>
+
+<p>This document is for version 2.0 of the authorization endpoint.</p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>The Authorization endpoints are GoCD extensions to build plugins which provide authentication and authorization.</p>
+
+<p>GoCD enforces authorization by restricting certain operations to specific users and groups of users (&ldquo;roles&rdquo;).</p>
+
+<p>Without the use of authorization plugins, roles can only be managed through GoCD and it does not provide an ability to use roles defined in systems used for authentication (for example in LDAP groups). With this limitation, administrators need to configure roles in multiples places.</p>
+
+<p>Authorization plugin endpoint allows GoCD to delegate both authentication and authorization of users to plugins. The plugins will have the flexibility to use any authorization service providers like LDAP, Google, GitHub etc.</p>
+
+<p>If you&rsquo;re looking to start away with a basic template for authorization plugins, we recommend forking this <a href="https://github.com/gocd-contrib/authorization-skeleton-plugin">Github repository</a>.</p>
+
+<h2 id="configuring-authorization-plugins">Configuring Authorization Plugins</h2>
+
+<p>Authorization Plugins need two types of configuration, <a href="#authorization-configuration"><code class="prettyprint">&lt;authConfig/&gt;</code></a> and <a href="#plugin-role-configuration"><code class="prettyprint">&lt;pluginRole/&gt;</code></a>.</p>
+
+<h3 id="authorization-configuration">Authorization Configuration</h3>
+
+<blockquote>
+<p>An example authorization configuration</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code>  <span class="nt">&lt;security&gt;</span>
+    <span class="nt">&lt;authConfigs&gt;</span>
+      <span class="nt">&lt;authConfig</span> <span class="na">id=</span><span class="s">"profile-id"</span> <span class="na">pluginId=</span><span class="s">"cd.go.authentication.ldap"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;property&gt;</span>
+          <span class="nt">&lt;key&gt;</span>Url<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>ldap://ldap-server-url<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property&gt;</span>
+          <span class="nt">&lt;key&gt;</span>ManagerDN<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>cn=go,ou=Teams,dc=corporate,dc=example,dc=com<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property&gt;</span>
+          <span class="nt">&lt;key&gt;</span>Password<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>secret<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property&gt;</span>
+          <span class="nt">&lt;key&gt;</span>SearchBases<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>ou=Teams,dc=corporate,dc=example,dc=com<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property&gt;</span>
+          <span class="nt">&lt;key&gt;</span>UserLoginFilter<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>(sAMAccountName={0})<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property&gt;</span>
+          <span class="nt">&lt;key&gt;</span>UserSearchFilter<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>(|(sAMAccountName=*{0}*)(uid=*{0}*)(cn=*{0}*)(mail=*{0}*)(otherMailbox=*{0}*))<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property&gt;</span>
+          <span class="nt">&lt;key&gt;</span>DisplayNameAttribute<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>displayName<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/property&gt;</span>
+        <span class="nt">&lt;property&gt;</span>
+          <span class="nt">&lt;key&gt;</span>EmailAttribute<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>mail<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/property&gt;</span>
+      <span class="nt">&lt;/authConfig&gt;</span>
+    <span class="nt">&lt;/authConfigs&gt;</span>
+  <span class="nt">&lt;/security&gt;</span>
+</code></pre></div>
+
+<p>Authorization configuration will usually allow administrators to configure the connection settings for your authorization plugin, and may include configuration like URLs and credentials, among others.</p>
+
+<p>GoCD administrators could provide multiple authorization configurations to connect with multiple authorization servers.</p>
+
+<h3 id="plugin-role-configuration">Plugin Role Configuration</h3>
+
+<blockquote>
+<p>An example plugin role configuration</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;pluginRole</span> <span class="na">name=</span><span class="s">"spacetiger"</span> <span class="na">authConfigId=</span><span class="s">"ldap"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;property&gt;</span>
+    <span class="nt">&lt;key&gt;</span>MemberOfAttribute<span class="nt">&lt;/key&gt;</span>
+    <span class="nt">&lt;value&gt;</span>memberOf<span class="nt">&lt;/value&gt;</span>
+  <span class="nt">&lt;/property&gt;</span>
+  <span class="nt">&lt;property&gt;</span>
+    <span class="nt">&lt;key&gt;</span>MatchingGroups<span class="nt">&lt;/key&gt;</span>
+    <span class="nt">&lt;value&gt;</span>CN=Dev,OU=Groups,DC=some,DC=enterprise,DC=com<span class="nt">&lt;/value&gt;</span>
+  <span class="nt">&lt;/property&gt;</span>
+<span class="nt">&lt;/pluginRole&gt;</span>
+</code></pre></div>
+
+<p>This is used to define roles in GoCD, unlike the current roles which contains a list of users pluginRole provides configuration to map a GoCD role to a role defined in an external authorization service. e.g pluginRole can be used to define mappings between LDAP group and GoCD roles.</p>
+
+<h1 id="getting-started">Getting started</h1>
+
+<p>Plugins in GoCD are implemented in Java and packaged as a JAR file.</p>
+
+<h2 id="structure-of-a-gocd-plugin">Structure of a GoCD Plugin</h2>
+
+<blockquote>
+<p>A plugin for GoCD is a JAR file with the following structure:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight plaintext"><code>plugin.jar
+|
+|-- plugin.xml
+|-- com
+|   \-- example
+|       \-- go
+|           \-- testplugin
+|               \-- LdapAuthorizationPlugin.class
+|               \-- x.class
+|               \-- y.class
+\-- lib
+    \-- dependency-1.jar
+    \-- dependency-2.jar
+</code></pre></div>
+
+<p>The plugin jar is a self contained-jar. It is expected to contain the following inside it:</p>
+
+<ul>
+<li><code class="prettyprint">plugin.xml</code> — The <a href="#the-plugin-metadata">metadata</a> of your plugin.</li>
+<li>The <a href="#the-plugin-extension-class">plugin extension class</a> (<code class="prettyprint">LdapAuthorizationPlugin.class</code> in the example shown) and any other classes that form your plugin.</li>
+<li>Any optional <a href="#the-plugin-dependencies">dependencies</a> your plugin may requires (inside the <code class="prettyprint">lib</code>).</li>
+</ul>
+
+<p><a id='the-plugin-metadata'></a></p>
+
+<h3 id="the-plugin-metadata-plugin-xml">The plugin metadata <code class="prettyprint">plugin.xml</code></h3>
+
+<blockquote>
+<p>Here is an example <code class="prettyprint">plugin.xml</code>:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8" ?&gt;</span>
+<span class="c">&lt;!-- Your plugin id and version
+     of this XML document, the
+     version must be set to "1" --&gt;</span>
+<span class="nt">&lt;go-plugin</span>
+  <span class="na">id=</span><span class="s">"com.example.rocket.launcher"</span>
+  <span class="na">version=</span><span class="s">"1"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;about&gt;</span>
+    <span class="c">&lt;!-- The name of your plugin --&gt;</span>
+    <span class="nt">&lt;name&gt;</span>Launches rockets<span class="nt">&lt;/name&gt;</span>
+    <span class="c">&lt;!--  The version of your plugin --&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.0.1<span class="nt">&lt;/version&gt;</span>
+    <span class="c">&lt;!-- The minimum version of GoCD that this plugin requires --&gt;</span>
+    <span class="nt">&lt;target-go-version&gt;</span>19.2.0<span class="nt">&lt;/target-go-version&gt;</span>
+    <span class="c">&lt;!-- A longer description of your plugin  --&gt;</span>
+    <span class="nt">&lt;description&gt;</span>Launches rockets, spaceships and other things to a destination of your choice.<span class="nt">&lt;/description&gt;</span>
+
+    <span class="c">&lt;!-- Tell us who you are --&gt;</span>
+    <span class="nt">&lt;vendor&gt;</span>
+      <span class="nt">&lt;name&gt;</span>ACME Corp<span class="nt">&lt;/name&gt;</span>
+      <span class="nt">&lt;url&gt;</span>https://www.example.com<span class="nt">&lt;/url&gt;</span>
+    <span class="nt">&lt;/vendor&gt;</span>
+
+    <span class="c">&lt;!-- If this plugin only supports certain OSes --&gt;</span>
+    <span class="nt">&lt;target-os&gt;</span>
+      <span class="nt">&lt;value&gt;</span>Linux<span class="nt">&lt;/value&gt;</span>
+      <span class="nt">&lt;value&gt;</span>Windows<span class="nt">&lt;/value&gt;</span>
+    <span class="nt">&lt;/target-os&gt;</span>
+  <span class="nt">&lt;/about&gt;</span>
+<span class="nt">&lt;/go-plugin&gt;</span>
+</code></pre></div>
+
+<p>This is an XML file that should be present in the plugin jar file at the top level.</p>
+
+<p>You can find the XML Schema for the plugins in the  <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-api/src/main/resources/plugin-descriptor.xsd">main repository</a>.</p>
+
+<p><a name='the-plugin-extension-class'></a></p>
+
+<h3 id="the-plugin-extension-class">The plugin extension class</h3>
+
+<blockquote>
+<p>Add this to your maven <code class="prettyprint">pom.xml</code>:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>cd.go.plugin<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>go-plugin-api<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>20.7.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div>
+
+<p>In order to use the plugin extension class, you must add the following to your maven dependencies. If you&rsquo;re using <a href="https://gradle.org">gradle</a>, then use <code class="prettyprint">cd.go.plugin:go-plugin-api:20.7.0</code>. You can find the latest version of the plugin in <a href="http://mvnrepository.com/artifact/cd.go.plugin/go-plugin-api">maven central</a>.</p>
+
+<div style='clear: both;'></div>
+
+<blockquote>
+<p>An example plugin class implementation:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">go</span><span class="o">.</span><span class="na">testplugin</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.annotation.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.exceptions.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.request.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.response.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">LdapAuthorizationPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+
+  <span class="c1">// this method is executed once at startup</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initializeGoApplicationAccessor</span><span class="o">(</span><span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">accessor</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="c1">// a GoPluginIdentifier tells GoCD what kind of a plugin this is</span>
+  <span class="c1">// and what version(s) of the request/response API it supports</span>
+  <span class="kd">public</span> <span class="nc">GoPluginIdentifier</span> <span class="nf">pluginIdentifier</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">GoPluginIdentifier</span><span class="o">(</span><span class="s">"authorization"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"2.0"</span><span class="o">))</span>
+  <span class="o">}</span>
+
+  <span class="c1">// handle the request and return a response</span>
+  <span class="c1">// the response is very much like a HTTP response —</span>
+  <span class="c1">// it has a status code, a response body and optional headers</span>
+  <span class="kd">public</span> <span class="nc">GoPluginApiResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">GoPluginApiRequest</span> <span class="n">request</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnhandledRequestTypeException</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"go.plugin-settings.get-view"</span><span class="o">))</span> <span class="o">{</span>
+      <span class="nc">String</span> <span class="n">viewHtml</span> <span class="o">=</span> <span class="n">read</span><span class="o">(</span><span class="n">getClass</span><span class="o">().</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="s">"/plugin-settings.template.html"</span><span class="o">));</span>
+      <span class="k">return</span> <span class="k">new</span> <span class="nf">DefaultGoPluginApiResponse</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="n">viewHtml</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"go.plugin-settings.validate-configuration"</span><span class="o">))</span> <span class="o">{</span>
+      <span class="nc">List</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">validate</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+      <span class="k">return</span> <span class="k">new</span> <span class="nf">DefaultGoPluginApiResponse</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">errors</span><span class="o">));</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nf">UnhandledRequestTypeException</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">());</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>The plugin extension class is a Java class that implements the <code class="prettyprint">GoPlugin</code> interface.</p>
+
+<p>The other types in the example are:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><a href="#requests-to-the-gocd-server"><code class="prettyprint">GoApplicationAccessor</code></a></td>
+<td>So that the plugin can make requests to the GoCD application to get additional information that is not provided by each request. For example, the plugin can ask for settings, credentials etc.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">GoPluginIdentifier</code></td>
+<td>Provides information about the type of plugin and the version of the request/response it supports.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">GoPluginApiRequest</code></td>
+<td>Represents the request message sent from GoCD to a plugin. The message will have a name and an optional JSON request body and the version of the extension.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">GoPluginApiResponse</code></td>
+<td>Represents the response message as a result of processing the <code class="prettyprint">GoPluginApiRequest</code>. Similar to <code class="prettyprint">GoPluginApiRequest</code>, the response will have a status code and an optional JSON response body.</td>
+</tr>
+</tbody></table>
+
+<p>If you&rsquo;re familiar with http request/responses handled by a web application, you will find this very familiar.</p>
+
+<aside class="notice">
+  GoCD has built in support for allowing plugins to enhance their capabilities in the future without having to break compatibility. This is achieved by ensuring that each extension-point and messages that is sent to the plugin is versioned.
+</aside>
+
+<p><a id='the-plugin-dependencies'></a></p>
+
+<h3 id="the-plugin-dependencies">The plugin dependencies</h3>
+
+<p>Any dependencies that your plugin requires, should go into the <code class="prettyprint">lib</code> directory inside the plugin JAR.</p>
+
+<h2 id="logging">Logging</h2>
+
+<p>Plugins can optionally log events to a log file. Plugin logging is supported by <code class="prettyprint">com.thoughtworks.go.plugin.api.logging.Logger</code> class, the Logger class should be available on including the <code class="prettyprint">go-plugin-api</code> dependency as mentioned earlier.</p>
+
+<blockquote>
+<p>An example for plugin logging:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">go</span><span class="o">.</span><span class="na">testplugin</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.logging.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">LdapAuthorizationPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">LdapAuthorizationPlugin</span><span class="o">);</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+
+  <span class="kd">public</span> <span class="nc">GoPluginApiResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">GoPluginApiRequest</span> <span class="n">request</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnhandledRequestTypeException</span> <span class="o">{</span>
+    <span class="no">LOG</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Request from server: "</span> <span class="o">+</span> <span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">());</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<h3 id="log-location">Log location</h3>
+
+<p>Each plugin will have a separate log file and the name of the log file will be in the format <code class="prettyprint">plugin-&lt;plugin_id&gt;.log</code>. The location of the plugin log file will be the same as the location of the GoCD server logs.</p>
+
+<h3 id="log-level">Log level</h3>
+
+<p>The default log level for a plugin is <code class="prettyprint">info</code>. The log level can be controlled using a Java system property which should be provided to the GoCD server.</p>
+
+<p>The system property to control the log level is specific to each plugin and is of the format <code class="prettyprint">plugin.&lt;plugin_id&gt;.log.level=&lt;log_level&gt;</code>. The log level can be either of <code class="prettyprint">info</code>, <code class="prettyprint">debug</code>, <code class="prettyprint">warn</code>, <code class="prettyprint">error</code>.</p>
+
+<h1 id="requests-from-the-gocd-server">Requests from the GoCD server</h1>
+
+<p>Authorization extension exposes endpoints to support authentication and authorization.</p>
+
+<p>All Authorization plugins should implement the following messages to support authentication.</p>
+
+<ul>
+<li><a href="#get-plugin-icon">Get Plugin Icon</a></li>
+<li><a href="#get-plugin-capabilities">Capabilities</a></li>
+<li><a href="#get-authorization-configuration-metadata">Get Authorization Configuration</a></li>
+<li><a href="#get-authorization-configuration-view">Get Authorization Configuration View</a></li>
+<li><a href="#validate-authorization-configuration">Validate Authorization Configuration</a></li>
+<li><a href="#authenticate-user">Authenticate User</a></li>
+<li><a href="#authorization-server-url">Authorization Server URL</a></li>
+<li><a href="#verify-connection">Verify Connection</a></li>
+<li><a href="#is-valid-user">Is Valid User</a></li>
+</ul>
+
+<p>If a plugin supports web based authentication, apart from the above, the plugin must implement the following messages. The plugin should use the <code class="prettyprint">supported_auth_type</code> <a href="#get-plugin-capabilities">capability</a> to expose this feature.</p>
+
+<ul>
+<li><a href="#fetch-access-token">Fetch Access Token</a></li>
+<li><a href="#authorization-server-url">Get Authorization Server Redirect URL</a></li>
+</ul>
+
+<p>For a plugin to support authorization, the following messages must be implemented. The plugin should use the <code class="prettyprint">can_authorize</code> <a href="#get-plugin-capabilities">capability</a> to expose this feature.</p>
+
+<ul>
+<li><a href="#get-role-configuration-metadata">Get Role Metadata</a></li>
+<li><a href="#get-role-configuration-view">Get Role View</a></li>
+<li><a href="#validate-role-configuration">Validate Role</a></li>
+</ul>
+
+<p>If a plugin supports search, the following message must be implemented in order to serve search request from server. The plugin should use the <code class="prettyprint">can_search</code> <a href="#get-plugin-capabilities">capability</a> to expose this feature.</p>
+
+<ul>
+<li><a href="#search-users">Search user</a></li>
+</ul>
+
+<p>If a plugin supports get roles, the plugin must implement the following messages. The plugin should use the <code class="prettyprint">can_get_user_roles</code> <a href="#get-plugin-capabilities">capability</a> to expose this feature.</p>
+
+<ul>
+<li><a href="#get-user-roles">Get User Roles</a></li>
+</ul>
+
+<h2 id="get-plugin-icon">Get Plugin Icon</h2>
+
+<p>This call is expected to return the icon for the plugin, so as to make it easy for users to identify the plugin.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.get-icon</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>An example plugin response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"content_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/svg+xml"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PHN2ZyB2ZXJzaW9u..."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The plugin is expected to return an <a href="#the-image-object">image object</a>.</p>
+
+<aside class="notice">
+  <strong>It is recommended that:</strong>
+  <ul>
+    <li>The image be an SVG image, since it scales well. Using other types like PNG/JPEG/GIF/BMP will work too, but is not recommended.</li>
+    <li>The image be a square image.</li>
+    <li>The base-64 encoded data is &lt;= 100KB. Bigger sizes will work too, but may take a long time to render.</li>
+  </ul>
+</aside>
+
+<h2 id="get-plugin-capabilities">Get Plugin Capabilities</h2>
+
+<p>This message is a request to the plugin to provide plugin capabilities. Based on these capabilities GoCD would enable or disable the plugin features for a user.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.get-capabilities</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>Server sends request with <code class="prettyprint">Empty</code> request body.</p>
+
+<p class='response-code-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"supported_auth_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"can_search"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"can_authorize"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"can_get_user_roles"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The response body will contain the following JSON elements:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">supported_auth_type</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>This key determines plugin authentication method. It can be one of <code class="prettyprint">password</code> or <code class="prettyprint">web</code>.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">can_search</code></td>
+<td><code class="prettyprint">Boolean</code></td>
+<td>Whether Plugin supports search or not, depends on this <code class="prettyprint">boolean</code> value.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">can_authorize</code></td>
+<td><code class="prettyprint">Boolean</code></td>
+<td>Whether Plugin supports authorization, depends on this <code class="prettyprint">boolean</code> value.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">can_get_user_roles</code></td>
+<td><code class="prettyprint">Boolean</code></td>
+<td>Whether Plugin supports get roles or not, depends on this <code class="prettyprint">boolean</code> value.</td>
+</tr>
+</tbody></table>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<h2 id="get-authorization-configuration-metadata">Get Authorization Configuration Metadata</h2>
+
+<p>This is a message that the plugin should implement, to allow users to configure authorization configuration (<code class="prettyprint">&lt;authConfig&gt;</code>) from the Authorization Configuration View in GoCD.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.auth-config.get-metadata</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Url"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ManagerDN"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+
+<p>The response body will contain the following JSON elements:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">key</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The name of the configuration property supported by an authorization configuration.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">metadata</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>The metadata associated with the key used in the authorization configuration. Valid keys are <code class="prettyprint">required</code> and <code class="prettyprint">secure</code>.</td>
+</tr>
+</tbody></table>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<h2 id="get-authorization-configuration-view">Get Authorization Configuration View</h2>
+
+<p>This is a message that the plugin should implement, to allow users to configure authentication configuration (<code class="prettyprint">&lt;authConfig&gt;</code>) from the Authorization Configuration View in GoCD.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.auth-config.get-view</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;div&gt;some html&lt;/div&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>A JSON <a href="#the-get-settings-view-object">settings view object</a></p>
+
+<h2 id="validate-authorization-configuration">Validate Authorization Configuration</h2>
+
+<p>This message must be implemented in order to validate the configuration. The plugin would receive this message from GoCD server during config save.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.auth-config.validate</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An example validation request body for LDAP plugin</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"Url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Any invalid Url"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"SearchBase"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ou=users,ou=system"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"ManagerDN"</span><span class="p">:</span><span class="w"> </span><span class="s2">"uid=admin,ou=system"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"SearchFilter"</span><span class="p">:</span><span class="w"> </span><span class="s2">"uid"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"Password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"secret"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"DisplayNameAttribute"</span><span class="p">:</span><span class="w"> </span><span class="s2">"displayName"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"EmailAttribute"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mail"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The request body will contain a configuration from authorization configuration, for which validation would have been called.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>The plugin should respond with JSON array response for each configuration key that has a validation error</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+   </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Url"</span><span class="p">,</span><span class="w">
+   </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Url is invalid."</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+
+<p>If any of the input keys have a validation error on them, the plugin is expected to return a list of <a href="#the-validation-error-object">validation error objects</a>. If the configuration is valid, the plugin should return an empty JSON array.</p>
+
+<h2 id="authenticate-user">Authenticate User</h2>
+
+<p>This message is a request to the plugin to authenticate and authorize a user, along with the user credentials the GoCD server sends all known
+<code class="prettyprint">&lt;authConfig /&gt;</code>  and <code class="prettyprint">&lt;roleConfig /&gt;</code> configured for the plugin. In case of multiple <code class="prettyprint">&lt;authConfig /&gt;</code> configured for the plugin, the plugin
+is expected to try authenticating the user against each config until a successful authentication.</p>
+
+<p>GoCD forces a perodic re-authentication of users, this is to ensure any changes like removing of users or roles in the external authorization server are reflected in GoCD.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.authenticate-user</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>The plugin will receive the following JSON body for password based authorization —</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"credentials"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"jdoe"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"secret"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"auth_configs"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"internal_ldap"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ldap://ldap1.example.com"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"external_ldap"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ldap://ldap2.example.com"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}],</span><span class="w">
+  </span><span class="nl">"role_configs"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"admin"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"auth_config_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"internal_ldap"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"memberOf"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ou=some-value"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"view"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"auth_config_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"external_ldap"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"memberOf"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ou=some-value"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">credentials</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>For a password based plugins, the server sends the &lsquo;username&rsquo; and &lsquo;password&rsquo; provided by the user at the time of login. For web based plugins, the server sends the data received from <a href="#fetch-access-token">Fetch Access Token</a> call made to the plugin.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">auth_configs</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This key contains list of <code class="prettyprint">&lt;authconfig&gt;</code> configured for the plugin.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">role_configs</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This key contains list of <code class="prettyprint">&lt;roleconfig&gt;</code> configured for the plugin.</td>
+</tr>
+</tbody></table>
+
+<p class='response-code-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"user"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"jdoe"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"John Doe"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"email_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"jdoe@example.com"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"roles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"blackbird"</span><span class="p">,</span><span class="w"> </span><span class="s2">"spacetiger"</span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>The response body will contain the following JSON elements:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">user</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This json object contains user details like <code class="prettyprint">username</code>, <code class="prettyprint">display_name</code> and <code class="prettyprint">email_id</code>.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">roles</code></td>
+<td><code class="prettyprint">Array</code></td>
+<td>Array of roles associated with authenticated user.</td>
+</tr>
+</tbody></table>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+<h2 id="verify-connection">Verify Connection</h2>
+
+<p>The plugin must implement this message in order to verify if a connection can be established with the authorization server using the authorization configuration.</p>
+
+<p>The plugin is expected to validate the configuration before trying to check connection.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.auth-config.verify-connection</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An example LDAP plugin authorization configuration request body to verify connection</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"Url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ldap://foo.bar.com:389"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"SearchBase"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ou=users,ou=system"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"ManagerDN"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Dummy manager dn"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"UserLoginFilter"</span><span class="p">:</span><span class="w"> </span><span class="s2">"(uid={0})"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"Password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"secret"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"DisplayNameAttribute"</span><span class="p">:</span><span class="w"> </span><span class="s2">"displayName"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"EmailAttribute"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mail"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>The request body will contain the authorization configuration for which verify connection is executed.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>Example response body based on successful verification</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Check connection passed"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>Example response body based on verification failed</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"failure"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Check connection failed, unable to reach ldap://my_ldap_server"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>Example response body based on validation failed</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"validation-failed"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Validation failed for the given authorization config"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"errors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ManagerDN"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Manager dn is invalid."</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>The response body will contain the following JSON elements:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">status</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>Status of verify connection call, can be eithe of <code class="prettyprint">success</code> or <code class="prettyprint">failure</code> or <code class="prettyprint">validation-failure</code></td>
+</tr>
+<tr>
+<td><code class="prettyprint">message</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>Message corresponding to the verify connection status.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">errors</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>In case of validation errors plugin should return a list of <a href="#the-validation-error-object">validation error objects</a>.</td>
+</tr>
+</tbody></table>
+<h2 id="get-role-configuration-metadata">Get Role Configuration Metadata</h2>
+
+<p>This is a message that the plugin should implement to allow users to configure role configuration(<code class="prettyprint">&lt;pluginRole&gt;</code>) from the Role Configuration View in GoCD. The role configuration should provide a way for admins to map Authorization Server roles with GoCD roles(e.g map LDAP groups to GoCD roles).</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.role-config.get-metadata</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MemberOf"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+<p>The response body will contain the following JSON elements:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">key</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The name of the configuration property supported by an authorization configuration.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">metadata</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>The metadata associated with the key used in the authorization configuration. Valid keys are <code class="prettyprint">required</code> and <code class="prettyprint">secure</code>.</td>
+</tr>
+</tbody></table>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+<h2 id="get-role-configuration-view">Get Role Configuration View</h2>
+
+<p>This is a message that the plugin should implement, to allow users to configure role configuration (<code class="prettyprint">&lt;pluginRole&gt;</code>) from the Role Configurations View in GoCD.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.role-config.get-view</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>A JSON <a href="#the-get-settings-view-object">settings view object</a></p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;div&gt;some html&lt;/div&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div><h2 id="validate-role-configuration">Validate Role Configuration</h2>
+
+<p>If a plugin requires any authorization configuration, this message must be implemented in order to validate the configuration.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.role-config.validate</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An example validation request body for LDAP plugin</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"MemberOf"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ou=blackbird,ou=area51,dc=example,dc=com"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>The request body will contain a role configuration, for which validation would have been called.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>The plugin should respond with JSON array response for each configuration key that has a validation error</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+   </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MemberOf"</span><span class="p">,</span><span class="w">
+   </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MemberOf cannot be blank"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+<p>If any of the input keys have a validation error on them, the plugin is expected to return a list of <a href="#the-validation-error-object">validation error objects</a>. If the configuration is valid, the plugin should return an empty JSON array.</p>
+<h2 id="search-users">Search users</h2>
+
+<p>If a plugin supports users search, this message must be implemented to lookup for users in an external Authorization Server through GoCD User Summary page.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.search-users</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An search request body</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"search_term"</span><span class="p">:</span><span class="w"> </span><span class="s2">"queried string"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"profiles"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"foo-ldap"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"Url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ldap://foo.url"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"bar-ldap"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"Url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ldap://bar.url"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>The request body will contain the following JSON elements:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">search_term</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The search string entered by the user.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">profiles</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This key contains list of <code class="prettyprint">&lt;authconfig&gt;</code> configured for plugin.</td>
+</tr>
+</tbody></table>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>The plugin should respond with JSON array of users</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sbanks"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sarah Banks"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"email_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sbanks@example.com"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pbanks"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Phillip Banks"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"email_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pbanks@example.com"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+<p>Plugin should respond with JSON array of users and each user must have following JSON elements in it.</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">username</code></td>
+<td><code class="prettyprint">String</code></td>
+<td><code class="prettyprint">username</code> of user which has to be unique  across user base.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">display_name</code></td>
+<td><code class="prettyprint">String</code></td>
+<td><code class="prettyprint">display_name</code> of user which gets displayed on GoCD  server. If <code class="prettyprint">display_name</code> is not provided then <code class="prettyprint">username</code> will be displayed.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">email_id</code></td>
+<td><code class="prettyprint">String</code></td>
+<td><code class="prettyprint">email_id</code> of user</td>
+</tr>
+</tbody></table>
+<h2 id="authorization-server-url">Authorization Server URL</h2>
+
+<p>This is a message that a web based plugin should implement. A web based plugin uses an external authorization server for authentication. For this request the plugin should return the URL of the external authorization server to which GoCD redirects the user for authentication.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.authorization-server-url</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>The plugin will receive the following JSON body which is a list of all auth configs configured for the plugin —</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"auth_configs"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"github_oauth"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://git_hub.com"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"client_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"jd9no0f"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"client_secret"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0njfg8fgmfvufv"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}],</span><span class="w">
+  </span><span class="nl">"authorization_server_callback_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://my_go_server/go/plugin/my_plugin_id/authenticate"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">auth_configs</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This key contains list of <code class="prettyprint">&lt;authconfig&gt;</code> configured for the plugin.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">authorization_server_callback_url</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>This key contains the GoCD url to which the authorization server should redirect on a successful authentication</td>
+</tr>
+</tbody></table>
+
+<p class='response-code-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"authorization_server_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://external_auth_server_url/login?redirect_url=http://my_go_server/go/plugin/my_plugin_id/authenticate&amp;client_id=hdfjh3r&amp;client_secret=vbvdv1493"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>The response body will contain the following JSON elements:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">authorization_server_url</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The external authorization server URL to which GoCD redirects the user for authentication.</td>
+</tr>
+</tbody></table>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+<h2 id="fetch-access-token">Fetch Access Token</h2>
+
+<p>This is a message that a web based plugin should implement. In case of web based authentication a user is authenticated by an external authorization server. On successful authentication, the authorization server should redirect to GoCD endpoint returned by <a href="#authorization-server-url">authorization server url</a> request. We would refer to these requests as pre-authenticated requests. Depending upon the authorization server, the pre-authenticated requests can contain user information either in HTTP header or request params. GoCD, upon receiving a pre-authenticated request, would make the fetch access token request to the plugin by passing all the user information provided by the authorization server. The plugin in turn should exchange this information with the authorization server to request for an access token to make subsequent requests on behalf of the user.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.fetch-access-token</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>The plugin will receive the following JSON body which is a list of all auth configs configured for the plugin —</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"auth_configs"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"github_oauth"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://git_hub.com"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"client_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"jd9no0f"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"client_secret"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0njfg8fgmfvufv"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">auth_configs</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This key contains list of <code class="prettyprint">&lt;authconfig&gt;</code> configured for the plugin.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">role_configs</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This key contains list of <code class="prettyprint">&lt;roleconfig&gt;</code> configured for the plugin.</td>
+</tr>
+</tbody></table>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>Request parameters would contain all request parameters sent by the external authorization server to GoCD.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>Request headers would contain all the HTTP request headers sent by the external authorization server to GoCD.</p>
+
+<p class='response-code-heading'>Response Body</p>
+
+<p>The response should be a JSON with the necessary information required by the plugin to make any subsequent calls to the authorization server on behalf of the user.
+GoCD would pass the returned json as credentials for the <a href="#authenticate-user">Authenticate User</a> request.</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+<h2 id="is-valid-user">Is Valid User</h2>
+
+<p>This is a message that a plugin should implement, in case of access token based authentication. User can configure access 
+token after authenticating him/her self using the plugin. The plugin will receive this message when a user is trying to 
+access API(s) via access token created using the same plugin.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.is-valid-user</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>The plugin will receive the following JSON body which is a list of all auth configs configured for the plugin —</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"auth_config"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"key1"</span><span class="p">:</span><span class="w"> </span><span class="s2">"value2"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ldap"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bob"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">auth_config</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This key represents the <code class="prettyprint">&lt;authconfig&gt;</code> using which token is created.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">username</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>This key represents username of the user for which this validation request has been made.</td>
+</tr>
+</tbody></table>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>Request parameters would contain all request parameters sent by the external authorization server to GoCD.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>Request headers would contain all the HTTP request headers sent by the external authorization server to GoCD.</p>
+
+<p class='response-code-heading'>Response Body</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if the user belongs to specified username is still valid.</p>
+<h2 id="get-user-roles">Get User Roles</h2>
+
+<p>This is a message that a web based plugin should implement, in case the plugin supports <code class="prettyprint">can_get_user_roles</code> <a href="#get-plugin-capabilities">capability</a>. The plugin will receive this message when GoCD requires to reauthorize the user. </p>
+
+<ul>
+<li>e.g. while accessing API(s) via Access Token.</li>
+</ul>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.get-user-roles</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>The plugin will receive the following JSON body which is a list of all auth configs configured for the plugin —</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"auth_config"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"key1"</span><span class="p">:</span><span class="w"> </span><span class="s2">"value2"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ldap"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"role_configs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"auth_config_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ldap"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"key2"</span><span class="p">:</span><span class="w"> </span><span class="s2">"value2"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"super-admin"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bob"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">auth_config</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This key represents <code class="prettyprint">&lt;authconfig&gt;</code> configured for the plugin.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">role_configs</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This key contains list of <code class="prettyprint">&lt;roleconfig&gt;</code> configured for the <code class="prettyprint">&lt;authconfig&gt;</code>.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">username</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>This key represents username of the user for which this request has been made.</td>
+</tr>
+</tbody></table>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>Request parameters would contain all request parameters sent by the external authorization server to GoCD.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>Request headers would contain all the HTTP request headers sent by the external authorization server to GoCD.</p>
+
+<p class='response-code-heading'>Response Body</p>
+
+<p>The response should be a JSON array of <code class="prettyprint">String</code> which represents role names assigned to the given user.</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+<h1 id="requests-to-the-gocd-server">Requests to the GoCD server</h1>
+
+<p>The plugin may make following requests to the server using <code class="prettyprint">GoApplicationAccessor#submit(GoApiRequest)</code></p>
+
+<ul>
+<li><a href="#invalidate-users-cache">Invalidate Cache</a></li>
+<li><a href="#get-server-info">Get Server Info</a></li>
+<li><a href="#add-server-health-messages">Add Server Health Messages</a></li>
+</ul>
+<h2 id="invalidate-users-cache">Invalidate Users Cache</h2>
+
+<p>This message allows a plugin invalidate logged in user session in GoCD.</p>
+
+<p>With authorization plugins a user is authenticated using an external authorization server, upon successful authentication GoCD creates a looged in session for the user. Changes on the external authorization server like removing a user or change of role needs to be notified to GoCD. This message can be used by plugins to trigger a re-authentication of users in GoCD.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.processor.authorization.invalidate-cache</code></p>
+
+<p class='request-body-heading'>Request version</p>
+
+<p>The request version must be set to <code class="prettyprint">1.0</code>.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not parse a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p>The server will not provide any response body.</p>
+<h2 id="get-server-info">Get Server Info</h2>
+
+<p>This messages allows a plugin to query the server to get some metadata about the server.</p>
+
+<p class='available-since'>
+  Available since v17.9.0.
+</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.processor.server-info.get</code></p>
+
+<p class='request-body-heading'>Request version</p>
+
+<p>The request version must be set to <code class="prettyprint">1.0</code>.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The plugin should not provide a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The server is expected to return status <code class="prettyprint">200</code> if it could process the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>The plugin will provide a <a href="#the-server-info-object">server info</a> object.</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"server_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"df0cb9be-2696-4689-8d46-1ef3c4e4447c"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"site_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://example.com:8153/go"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"secure_site_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.com:8154/go"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<h2 id="add-server-health-messages">Add Server Health Messages</h2>
+<div class="highlight"><pre class="highlight java"><code><span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.annotation.Extension</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.logging.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.request.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.response.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">LdapAuthorizationPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">LdapAuthorizationPlugin</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initializeGoApplicationAccessor</span><span class="o">(</span><span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">accessor</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="nc">GoPluginIdentifier</span> <span class="nf">pluginIdentifier</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">GoPluginIdentifier</span><span class="o">(</span><span class="s">"authorization"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"1.0"</span><span class="o">));</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="kt">void</span> <span class="nf">addErrorsAndWarnings</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">Gson</span> <span class="n">gson</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Gson</span><span class="o">();</span>
+    <span class="c1">// create a request</span>
+    <span class="nc">DefaultGoApiRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DefaultGoApiRequest</span><span class="o">(</span>
+      <span class="s">"go.processor.server-health.add-messages"</span><span class="o">,</span>
+      <span class="s">"1.0"</span><span class="o">,</span>
+      <span class="n">pluginIdentifier</span><span class="o">()</span>
+    <span class="o">);</span>
+
+    <span class="c1">// set the request body</span>
+    <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;&gt;</span> <span class="n">messages</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+
+    <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">message1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="n">message1</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"type"</span><span class="o">,</span> <span class="s">"warning"</span><span class="o">);</span>
+    <span class="n">message1</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"message"</span><span class="o">,</span> <span class="s">"A warning message from the plugin."</span><span class="o">);</span>
+
+    <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">message2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="n">message2</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"type"</span><span class="o">,</span> <span class="s">"error"</span><span class="o">);</span>
+    <span class="n">message2</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"message"</span><span class="o">,</span> <span class="s">"An error message from the plugin."</span><span class="o">);</span>
+
+    <span class="n">messages</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">message1</span><span class="o">);</span>
+    <span class="n">messages</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">message2</span><span class="o">);</span>
+
+    <span class="n">request</span><span class="o">.</span><span class="na">setRequestBody</span><span class="o">(</span><span class="n">gson</span><span class="o">.</span><span class="na">toJson</span><span class="o">(</span><span class="n">messages</span><span class="o">));</span>
+
+    <span class="c1">// submit the request</span>
+    <span class="nc">GoApiResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">.</span><span class="na">submit</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+
+    <span class="c1">// check status</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">responseCode</span><span class="o">()</span> <span class="o">!=</span> <span class="mi">200</span><span class="o">)</span> <span class="o">{</span>
+      <span class="no">LOG</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"The server sent an unexpected status code "</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="na">responseCode</span><span class="o">()</span> <span class="o">+</span> <span class="s">" with the response body "</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="na">responseBody</span><span class="o">());</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>This message allows a plugin to add error and warning messages to be shown in
+GoCD. Any previous messages sent by the plugin will be cleared and replaced with
+the newly specified messages (or cleared if the body is an empty list).</p>
+
+<p class='available-since'>
+  Available since v18.3.0.
+</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.processor.server-health.add-messages</code></p>
+
+<p class='request-body-heading'>Request version</p>
+
+<p>The request version must be set to <code class="prettyprint">1.0</code>.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An example request body:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"warning"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A warning message from the plugin."</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"error"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"An error message from the plugin."</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+<p>Must be a JSON array made up of JSON objects as described below:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">type</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>Should be either <code class="prettyprint">warning</code> or <code class="prettyprint">error</code>, corresponding to the type of message to be shown.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">message</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>A message to be shown in the &ldquo;Errors and Warnings&rdquo; box.</td>
+</tr>
+</tbody></table>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The server is expected to return status <code class="prettyprint">200</code> if it could process the request. It is expected to return status <code class="prettyprint">500</code> if it failed to process the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body for a failure:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"An error occurred ..."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>The server will respond with a single JSON object with an error message with the key <code class="prettyprint">message</code>, if it is unable to process the request. If
+successful, the response body will be empty.</p>
+
+<h1 id="request-response-json-objects">Request/Response JSON Objects</h1>
+
+<p><a id='the-get-settings-view-object'></a></p>
+
+<h3 id="the-settings-view-object">The Settings View Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the settings view object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;div class=</span><span class="se">\"</span><span class="s2">form_item_block</span><span class="se">\"</span><span class="s2">&gt;...&lt;/div&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">template</code></td>
+<td>String</td>
+<td>A string containing an HTML AngularJS based view.</td>
+</tr>
+</tbody></table>
+
+<p><a id='the-image-object'></a></p>
+
+<h3 id="the-image-object">The Image Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the image object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"content_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/svg+xml"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="s2">"...."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">content_type</code></td>
+<td>String</td>
+<td>A valid <a href="http://www.iana.org/assignments/media-types/media-types.xhtml#image">content type</a> for the image. Please make sure the content type is supported by most browsers.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">data</code></td>
+<td>String</td>
+<td>A <a href="https://en.wikipedia.org/wiki/Base64">base-64</a> encoded (single-line non-chunking) byte array of the byte-sequence that composes the image.</td>
+</tr>
+</tbody></table>
+
+<p><a id='the-plugin-settings-configuration-object'></a></p>
+
+<h3 id="the-validation-error-object">The Validation Error Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the validation error object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"email_address"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Email address is invalid"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Password must be provided"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">key</code></td>
+<td>String</td>
+<td>The name of configuration key that has an error.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">message</code></td>
+<td>String</td>
+<td>The error message associated with that key.</td>
+</tr>
+</tbody></table>
+
+<p><a id='the-verify-connection-error-object'></a></p>
+
+<h3 id="the-verify-connection-error-object">The Verify Connection Error Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the verify connection error object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Failed to authenticate `ManagerDN`."</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">key</code></td>
+<td>String</td>
+<td>Empty string.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">message</code></td>
+<td>String</td>
+<td>Connection check failure message.</td>
+</tr>
+</tbody></table>
+
+<p><a id='the-server-info-object'></a></p>
+
+<h3 id="the-server-info-object">The server info object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the server info object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"server_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"df0cb9be-2696-4689-8d46-1ef3c4e4447c"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"site_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://example.com:8153/go"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"secure_site_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.com:8154/go"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">server_id</code></td>
+<td>String</td>
+<td>This contains a unique identifier for this server.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">site_url</code></td>
+<td>String</td>
+<td>This contains the site url configured for this server.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">secure_site_url</code></td>
+<td>String</td>
+<td>This contains the secure site url configured for this server.</td>
+</tr>
+</tbody></table>
+
+      </div>
+      <div class="dark-box">
+          <div class="lang-selector">
+          </div>
+      </div>
+    </div>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-48357651-2', 'auto');
+  ga('send', 'pageview');
+</script>
+  </body>
+</html>
