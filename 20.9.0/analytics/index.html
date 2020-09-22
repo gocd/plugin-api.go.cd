@@ -1,0 +1,1787 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name ="description" content="Extend GoCD's functionality. Implement GoCD plugins for SCMs, tasks, notifications, authentication, package repositories, elastic agents and authorization." />
+    <meta name ="keywords" content="gocd plugins, plugins for gocd, extension points, open source gocd, open source continuous delivery" />
+    <link href="../images/gocd.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href="../images/gocd.png" rel="apple-touch-icon" type="image/png" size="192x192" />
+    <title>GoCD Analytics Plugin API Reference</title>
+
+    <style>
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #f8f8f2;
+  background-color: #272822;
+}
+.highlight .err {
+  color: #272822;
+  background-color: #f92672;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #f4bf75;
+}
+.highlight .nt {
+  color: #f4bf75;
+}
+.highlight .o, .highlight .ow {
+  color: #f8f8f2;
+}
+.highlight .p, .highlight .pi {
+  color: #f8f8f2;
+}
+.highlight .gi {
+  color: #a6e22e;
+}
+.highlight .gd {
+  color: #f92672;
+}
+.highlight .gh {
+  color: #66d9ef;
+  background-color: #272822;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #ae81ff;
+}
+.highlight .kc {
+  color: #fd971f;
+}
+.highlight .kt {
+  color: #fd971f;
+}
+.highlight .kd {
+  color: #fd971f;
+}
+.highlight .s, .highlight .sa, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #a6e22e;
+}
+.highlight .sr {
+  color: #a1efe4;
+}
+.highlight .si {
+  color: #cc6633;
+}
+.highlight .se {
+  color: #cc6633;
+}
+.highlight .nn {
+  color: #f4bf75;
+}
+.highlight .nc {
+  color: #f4bf75;
+}
+.highlight .no {
+  color: #f4bf75;
+}
+.highlight .na {
+  color: #66d9ef;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #a6e22e;
+}
+.highlight .ss {
+  color: #a6e22e;
+}
+    </style>
+    <link href="../stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="../stylesheets/print.css" rel="stylesheet" media="print" />
+
+      <script src="../javascripts/all.js"></script>
+
+
+      <script>
+        $(function() {
+          setupLanguages([]);
+        });
+      </script>
+  </head>
+
+  <body class="analytics analytics_index" data-languages="[]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="../images/navbar.png" alt="Navbar" />
+      </span>
+    </a>
+    <div class="tocify-wrapper">
+      <a href="../"><img src="../images/logo.png" alt="Logo" /></a>
+        <div class="lang-selector">
+        </div>
+      <div class="version-switcher">
+        <span class="version-label">Switch version:</span>
+        <select class="version"></select>
+      </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      <div id="toc">
+      </div>
+        <ul class="toc-footer">
+            <li><a href='https://github.com/gocd/plugin-api.go.cd'>Edit this guide on GitHub</a></li>
+            <li><a href='https://api.gocd.org'>GoCD API Documentation</a></li>
+            <li><a href='https://docs.gocd.org'>GoCD User Documentation</a></li>
+        </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id="analytics-plugins">Analytics Plugins</h1>
+
+<h2 id="current-version">Current Version</h2>
+
+<p>This document is for version 2.0 of the analytics endpoint.</p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>The Analytics endpoints are GoCD extensions which allow plugins to embed external analytics directly into GoCD. The Analytics endpoint complements the <a href="../notifications/">Notification endpoint</a>, allowing visualizations and insights into the metrics collected using the Notification endpoint and from other sources.</p>
+
+<p>GoCD provides a placeholder on the pipeline dashboard for plugins to display their pipeline level analytics. Apart from this, GoCD also provides a global analytics dashboard which can be leveraged by plugins to visualize analytics at a global level.</p>
+
+<p>If you&rsquo;re looking to start right away with a basic template for analytics plugins, we recommend forking this <a href="https://github.com/gocd-contrib/analytics-skeleton-plugin">GitHub repository</a>.</p>
+
+<h1 id="getting-started">Getting started</h1>
+
+<p>Plugins in GoCD are implemented in Java and packaged as a JAR file.</p>
+
+<h2 id="structure-of-a-gocd-plugin">Structure of a GoCD Plugin</h2>
+
+<blockquote>
+<p>A plugin for GoCD is a JAR file with the following structure:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight plaintext"><code>plugin.jar
+|
+|-- plugin.xml
+|-- com
+|   \-- example
+|       \-- go
+|           \-- testplugin
+|               \-- ConsoleOutAnalyticsPlugin.class
+|               \-- x.class
+|               \-- y.class
+\-- lib
+    \-- dependency-1.jar
+    \-- dependency-2.jar
+</code></pre></div>
+
+<p>The plugin jar is a self contained-jar. It is expected to contain the following inside it:</p>
+
+<ul>
+<li><code class="prettyprint">plugin.xml</code> — The <a href="#the-plugin-metadata">metadata</a> of your plugin.</li>
+<li>The <a href="#the-plugin-extension-class">plugin extension class</a> (<code class="prettyprint">ConsoleOutAnalyticsPlugin.class</code> in the example shown) and any other classes that form your plugin.</li>
+<li>Any optional <a href="#the-plugin-dependencies">dependencies</a> your plugin may requires (inside the <code class="prettyprint">lib</code>).</li>
+</ul>
+
+<p><a id='the-plugin-metadata'></a></p>
+
+<h3 id="the-plugin-metadata-plugin-xml">The plugin metadata <code class="prettyprint">plugin.xml</code></h3>
+
+<blockquote>
+<p>Here is an example <code class="prettyprint">plugin.xml</code>:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8" ?&gt;</span>
+<span class="c">&lt;!-- Your plugin id and version
+     of this XML document, the
+     version must be set to "1" --&gt;</span>
+<span class="nt">&lt;go-plugin</span>
+  <span class="na">id=</span><span class="s">"com.example.rocket.launcher"</span>
+  <span class="na">version=</span><span class="s">"1"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;about&gt;</span>
+    <span class="c">&lt;!-- The name of your plugin --&gt;</span>
+    <span class="nt">&lt;name&gt;</span>Launches rockets<span class="nt">&lt;/name&gt;</span>
+    <span class="c">&lt;!--  The version of your plugin --&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.0.1<span class="nt">&lt;/version&gt;</span>
+    <span class="c">&lt;!-- The minimum version of GoCD that this plugin requires --&gt;</span>
+    <span class="nt">&lt;target-go-version&gt;</span>18.3.0<span class="nt">&lt;/target-go-version&gt;</span>
+    <span class="c">&lt;!-- A longer description of your plugin  --&gt;</span>
+    <span class="nt">&lt;description&gt;</span>Launches rockets, spaceships and other things to a destination of your choice.<span class="nt">&lt;/description&gt;</span>
+
+    <span class="c">&lt;!-- Tell us who you are --&gt;</span>
+    <span class="nt">&lt;vendor&gt;</span>
+      <span class="nt">&lt;name&gt;</span>ACME Corp<span class="nt">&lt;/name&gt;</span>
+      <span class="nt">&lt;url&gt;</span>https://www.example.com<span class="nt">&lt;/url&gt;</span>
+    <span class="nt">&lt;/vendor&gt;</span>
+
+    <span class="c">&lt;!-- If this plugin only supports certain OSes --&gt;</span>
+    <span class="nt">&lt;target-os&gt;</span>
+      <span class="nt">&lt;value&gt;</span>Linux<span class="nt">&lt;/value&gt;</span>
+      <span class="nt">&lt;value&gt;</span>Windows<span class="nt">&lt;/value&gt;</span>
+    <span class="nt">&lt;/target-os&gt;</span>
+  <span class="nt">&lt;/about&gt;</span>
+<span class="nt">&lt;/go-plugin&gt;</span>
+</code></pre></div>
+
+<p>This is an XML file that should be present in the plugin jar file at the top level.</p>
+
+<p>You can find the XML Schema for the plugins in the  <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-api/src/main/resources/plugin-descriptor.xsd">main repository</a>.</p>
+
+<p><a name='the-plugin-extension-class'></a></p>
+
+<h3 id="the-plugin-extension-class">The plugin extension class</h3>
+
+<blockquote>
+<p>Add this to your maven <code class="prettyprint">pom.xml</code>:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>cd.go.plugin<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>go-plugin-api<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>20.9.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div>
+
+<p>In order to use the plugin extension class, you must add the following to your maven dependencies. If you&rsquo;re using <a href="https://gradle.org">gradle</a>, then use <code class="prettyprint">cd.go.plugin:go-plugin-api:20.9.0</code>. You can find the latest version of the plugin in <a href="http://mvnrepository.com/artifact/cd.go.plugin/go-plugin-api">maven central</a>.</p>
+
+<div style='clear: both;'></div>
+
+<blockquote>
+<p>An example plugin class implementation:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">go</span><span class="o">.</span><span class="na">testplugin</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.annotation.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.exceptions.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.request.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.response.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConsoleOutAnalyticsPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+
+  <span class="c1">// this method is executed once at startup</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initializeGoApplicationAccessor</span><span class="o">(</span><span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">accessor</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="c1">// a GoPluginIdentifier tells GoCD what kind of a plugin this is</span>
+  <span class="c1">// and what version(s) of the request/response API it supports</span>
+  <span class="kd">public</span> <span class="nc">GoPluginIdentifier</span> <span class="nf">pluginIdentifier</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">GoPluginIdentifier</span><span class="o">(</span><span class="s">"analytics"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"1.0"</span><span class="o">))</span>
+  <span class="o">}</span>
+
+  <span class="c1">// handle the request and return a response</span>
+  <span class="c1">// the response is very much like a HTTP response —</span>
+  <span class="c1">// it has a status code, a response body and optional headers</span>
+  <span class="kd">public</span> <span class="nc">GoPluginApiResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">GoPluginApiRequest</span> <span class="n">request</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnhandledRequestTypeException</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"go.plugin-settings.get-view"</span><span class="o">))</span> <span class="o">{</span>
+      <span class="nc">String</span> <span class="n">viewHtml</span> <span class="o">=</span> <span class="n">read</span><span class="o">(</span><span class="n">getClass</span><span class="o">().</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="s">"/plugin-settings.template.html"</span><span class="o">));</span>
+      <span class="k">return</span> <span class="k">new</span> <span class="nf">DefaultGoPluginApiResponse</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="n">viewHtml</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"go.plugin-settings.validate-configuration"</span><span class="o">))</span> <span class="o">{</span>
+      <span class="nc">List</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">validate</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+      <span class="k">return</span> <span class="k">new</span> <span class="nf">DefaultGoPluginApiResponse</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">errors</span><span class="o">));</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nf">UnhandledRequestTypeException</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">());</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>The plugin extension class is a Java class that implements the <code class="prettyprint">GoPlugin</code> interface.</p>
+
+<p>The other types in the example are:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><a href="#requests-to-the-gocd-server"><code class="prettyprint">GoApplicationAccessor</code></a></td>
+<td>So that the plugin can make requests to the GoCD application to get additional information that is not provided by each request. For example, the plugin can ask for settings, credentials etc.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">GoPluginIdentifier</code></td>
+<td>Provides information about the type of plugin and the version of the request/response it supports.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">GoPluginApiRequest</code></td>
+<td>Represents the request message sent from GoCD to a plugin. The message will have a name and an optional JSON request body and the version of the extension.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">GoPluginApiResponse</code></td>
+<td>Represents the response message as a result of processing the <code class="prettyprint">GoPluginApiRequest</code>. Similar to <code class="prettyprint">GoPluginApiRequest</code>, the response will have a status code and an optional JSON response body.</td>
+</tr>
+</tbody></table>
+
+<p>If you&rsquo;re familiar with http request/responses handled by a web application, you will find this very familiar.</p>
+
+<aside class="notice">
+  GoCD has built in support for allowing plugins to enhance their capabilities in the future without having to break compatibility. This is achieved by ensuring that each extension-point and messages that is sent to the plugin is versioned.
+</aside>
+
+<p><a id='the-plugin-dependencies'></a></p>
+
+<h3 id="the-plugin-dependencies">The plugin dependencies</h3>
+
+<p>Any dependencies that your plugin requires, should go into the <code class="prettyprint">lib</code> directory inside the plugin JAR.</p>
+
+<h2 id="logging">Logging</h2>
+
+<p>Plugins can optionally log events to a log file. Plugin logging is supported by <code class="prettyprint">com.thoughtworks.go.plugin.api.logging.Logger</code> class, the Logger class should be available on including the <code class="prettyprint">go-plugin-api</code> dependency as mentioned earlier.</p>
+
+<blockquote>
+<p>An example for plugin logging:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">go</span><span class="o">.</span><span class="na">testplugin</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.logging.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConsoleOutAnalyticsPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">ConsoleOutAnalyticsPlugin</span><span class="o">);</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+
+  <span class="kd">public</span> <span class="nc">GoPluginApiResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">GoPluginApiRequest</span> <span class="n">request</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnhandledRequestTypeException</span> <span class="o">{</span>
+    <span class="no">LOG</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Request from server: "</span> <span class="o">+</span> <span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">());</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<h3 id="log-location">Log location</h3>
+
+<p>Each plugin will have a separate log file and the name of the log file will be in the format <code class="prettyprint">plugin-&lt;plugin_id&gt;.log</code>. The location of the plugin log file will be the same as the location of the GoCD server logs.</p>
+
+<h3 id="log-level">Log level</h3>
+
+<p>The default log level for a plugin is <code class="prettyprint">info</code>. The log level can be controlled using a Java system property which should be provided to the GoCD server.</p>
+
+<p>The system property to control the log level is specific to each plugin and is of the format <code class="prettyprint">plugin.&lt;plugin_id&gt;.log.level=&lt;log_level&gt;</code>. The log level can be either of <code class="prettyprint">info</code>, <code class="prettyprint">debug</code>, <code class="prettyprint">warn</code>, <code class="prettyprint">error</code>.</p>
+
+<h1 id="requests-from-the-gocd-server">Requests from the GoCD server</h1>
+
+<p>In order to implement an analytics extension point the following messages must be implemented by the plugin.</p>
+
+<ul>
+<li><a href="#get-plugin-capabilities">Get Capabilities</a></li>
+<li><a href="#get-static-assets">Get Static Assets</a></li>
+<li><a href="#get-analytics">Get Analytics</a></li>
+<li><a href="#plugin-settings-changed">Plugin Settings Changed</a></li>
+</ul>
+
+<p>These are general purpose messages that a plugin must implement to allow users to configure the plugin through the browser.</p>
+
+<ul>
+<li><a href="#get-plugin-icon">Get Plugin Icon</a></li>
+<li><a href="#get-settings-view">Get Settings View</a></li>
+<li><a href="#get-plugin-configuration">Get Plugin Configuration</a></li>
+<li><a href="#validate-plugin-configuration">Validate Plugin Configuration</a></li>
+</ul>
+
+<h2 id="get-plugin-capabilities">Get Plugin Capabilities</h2>
+
+<p>This message is a request to the plugin to provide plugin capabilities. The capabilities should be a list of analytics supported by the plugin. Based on the type of supported analytics, GoCD decides the page on which to render the analytics, e.g analytics of type <code class="prettyprint">pipeline</code> will show up on the GoCD pipeline dashboard.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.analytics.get-capabilities</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>Server sends request with <code class="prettyprint">Empty</code> request body.</p>
+
+<p class='response-code-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"supported_analytics"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pipeline_duration"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Pipeline Duration"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pipeline"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pipelines_with_longest_average_wait_time"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Pipelines With The Longest Average Wait Times"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dashboard"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The response body should contain the <code>supported_analytics</code> field which is a collection of analytics metrics. Each analytics metric has following JSON elements:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">id</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>Unique identifier for an analytics. The id will be used by GoCD to fetch a specific metric from the plugin.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">title</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The title for analytics.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">type</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The type of the analytics which defines the position of analytics in GoCD.</td>
+</tr>
+</tbody></table>
+
+<p>Valid types of analytics metric are as follows:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Type</th>
+<th>Scope</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">dashboard</code></td>
+<td>Dashboard level analytics will be displayed at the global level in the GoCD application.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">pipeline</code></td>
+<td>Pipeline level analytics will be displayed on each pipeline in the GoCD application.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">agent</code></td>
+<td>Agent level analytics can be viewed on the agents page in the GoCD application for each agent.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">vsm</code></td>
+<td>VSM analytics can be viewed on the Value Stream Map(VSM) page in the GoCD application.</td>
+</tr>
+</tbody></table>
+
+<aside class="info">
+  <strong>Note</strong>: Any other analytics type apart from above mentioned types will be ignored.
+</aside>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<h2 id="get-static-assets">Get Static Assets</h2>
+
+<blockquote>
+<p>Example code snippet for generating the response:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight java"><code>    <span class="kd">public</span> <span class="nc">GoPluginApiResponse</span> <span class="nf">execute</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="nc">DefaultGoPluginApiResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DefaultGoPluginApiResponse</span><span class="o">(</span><span class="mi">200</span><span class="o">);</span>
+        <span class="n">response</span><span class="o">.</span><span class="na">setResponseBody</span><span class="o">(</span>
+                <span class="no">GSON</span><span class="o">.</span><span class="na">toJson</span><span class="o">(</span><span class="nc">Collections</span><span class="o">.</span><span class="na">singletonMap</span><span class="o">(</span><span class="s">"assets"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">String</span><span class="o">(</span>
+                        <span class="nc">Base64</span><span class="o">.</span><span class="na">getEncoder</span><span class="o">().</span><span class="na">encode</span><span class="o">(</span>
+                            <span class="nc">IOUtils</span><span class="o">.</span><span class="na">toByteArray</span><span class="o">(</span><span class="n">getClass</span><span class="o">().</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="s">"assets.zip"</span><span class="o">))</span>
+                        <span class="o">),</span>
+                        <span class="nc">StandardCharsets</span><span class="o">.</span><span class="na">ISO_8859_1</span>
+                <span class="o">)))</span>
+        <span class="o">);</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre></div>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"assets"</span><span class="p">:</span><span class="w"> </span><span class="s2">"static assets which is a Base64 encoded zip file"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<blockquote>
+<p>An examples assets.zip file:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight shell"><code><span class="nv">$ </span>unzip <span class="nt">-l</span> assets.zip
+Archive:  assets.zip
+  Length      Date    Time    Name
+<span class="nt">---------</span>  <span class="nt">----------</span> <span class="nt">-----</span>   <span class="nt">----</span>
+      240  02-01-1980 00:00   pipeline_analytics.html
+        0  02-01-1980 00:00   js/
+     1350  02-01-1980 00:00   js/my-script.js
+<span class="nt">---------</span>                     <span class="nt">-------</span>
+   478394                     16 files
+<span class="nv">$ </span>unzip <span class="nt">-p</span> assets.zip pipeline_analytics.html
+&lt;html&gt;
+&lt;<span class="nb">head</span><span class="o">&gt;</span>
+  &lt;title&gt;My chart!&lt;/title&gt;
+  &lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">"text/javascript"</span> <span class="nv">src</span><span class="o">=</span><span class="s2">"plugin-endpoint.js"</span><span class="o">&gt;</span>&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div <span class="nb">id</span><span class="o">=</span><span class="s2">"chart-container"</span><span class="o">&gt;</span>&lt;/div&gt;
+  &lt;script <span class="nb">type</span><span class="o">=</span><span class="s2">"text/javascript"</span> <span class="nv">src</span><span class="o">=</span><span class="s2">"js/my-script.js"</span><span class="o">&gt;</span>&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre></div>
+
+<p>For building rich visualizations plugins might need to use multiple static assets like javascript libraries, images, css, HTML etc. GoCD provides an option for plugins to cache these static assets in GoCD. The plugin is free to decide on the type of static assets it wants to use.</p>
+
+<p>On plugin load GoCD sends this message to fetch the static assets. The plugin should zip all the assets and return the zipped assets as a Base64 encoded string. GoCD will unzip and store the contents in a path specific to the plugin. Every time a plugin is loaded GoCD will delete any existing plugin assets before storing the new assets.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.analytics.get-static-assets</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>Server sends request with an empty request body.</p>
+
+<p class='response-code-heading'>Response Body</p>
+
+<p>The response body should contain the <code>assets</code> field which is the zipped static assets as a Base64 encoded string.</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">assets</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The zipped assets returned as a Base64 encoded string.</td>
+</tr>
+</tbody></table>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<h2 id="get-analytics">Get Analytics</h2>
+
+<p>This message is a request to the plugin to fetch analytics for display.</p>
+
+<p>Analytics is currently supported on the pipeline dashboard and the analytics dashboard. On a request to render analytics, GoCD sends a message to the plugin to fetch analytics. The plugin is expected to respond with a JSON which contains a path to an HTML which would render the analytics and the relevant data for rendering the analytics.</p>
+
+<p>The <code class="prettyprint">view_path</code> should refer to the HTML which should be part of the <a href="#get-static-assets">static assets</a> returned by the plugin. GoCD, on receiving the response, will load the HTML specified in the <code class="prettyprint">view_path</code> in an iframe and pass the relevant <code class="prettyprint">data</code>. The HTML is responsible for building the visualization using the provided data. See the <a href="#analytics-js-api">Analytics JS API</a> section below for more information.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.analytics.get-analytics</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An example request body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pipeline"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"analytics_for_pipeline"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"params"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"pipeline_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_pipeline"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">type</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The type of the analytics as defined in the <a href="#get-plugin-capabilities">Plugin Capabilities</a>.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">id</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The id of the analytics as defined in the <a href="#get-plugin-capabilities">Plugin Capabilities</a>.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">params</code></td>
+<td><code class="prettyprint">Object</code></td>
+<td>This is a hash of optional params the plugin would require to generate analytics.</td>
+</tr>
+</tbody></table>
+
+<p>Request <code class="prettyprint">params</code> for analytics of type <code class="prettyprint">pipeline</code>:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Param</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">pipeline_name</code></td>
+<td>Name of pipeline to view analytics for.</td>
+</tr>
+</tbody></table>
+
+<p>Request <code class="prettyprint">params</code> for analytics of type <code class="prettyprint">vsm</code>:</p>
+
+<p>The Value Stream Map(VSM) visualize the entire workflow of a pipeline or material with its upstream and downstream dependencies laid out as graph. For plugins which support VSM analytics, GoCD allows users to choose a sub-workflow by providing an ability to select a <code class="prettyprint">source</code> and <code class="prettyprint">destination</code> from the Graph.</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Param</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">source</code></td>
+<td>Name of pipeline/material which will be the source of the workflow.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">destination</code></td>
+<td>Name of pipeline which will be the destination of the workflow.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">vsm_graph</code></td>
+<td>The entire VSM Graph for a pipeline/material with its upstream and downstream dependencies.</td>
+</tr>
+</tbody></table>
+
+<p class='response-code-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{</span><span class="se">\"</span><span class="s2">failed_count</span><span class="se">\"</span><span class="s2">:10, </span><span class="se">\"</span><span class="s2">passed_count</span><span class="se">\"</span><span class="s2">: 34}"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"view_path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pipeline_analytics.html"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The response body should contain the following JSON elements:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">data</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The data as <code class="prettyprint">json</code> string used to build the analytics.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">view_path</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>The path to the HTML file which will render the requested analytics.</td>
+</tr>
+</tbody></table>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<h2 id="plugin-settings-changed">Plugin Settings Changed</h2>
+
+<p>This is a notification message to the plugin on update of plugin settings.</p>
+
+<p>Every time the plugin settings change, GoCD will send this message to the plugin with the updated plugin settings.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.plugin-settings.plugin-settings-changed</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The request body will be a JSON which will be a map of the plugin settings.</p>
+
+<blockquote>
+<p>An example request body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"server_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://build.go.cd"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"view"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The server is expected to return status <code class="prettyprint">200</code> if it could process the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>Can be left blank, the server does not parse any response body returned.</p>
+
+<h2 id="get-plugin-icon">Get Plugin Icon</h2>
+
+<p>This call is expected to return the icon for the plugin, so as to make it easy for users to identify the plugin.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.cd.authorization.get-icon</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>An example plugin response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"content_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/svg+xml"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PHN2ZyB2ZXJzaW9u..."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The plugin is expected to return an <a href="#the-image-object">image object</a>.</p>
+
+<aside class="notice">
+  <strong>It is recommended that:</strong>
+  <ul>
+    <li>The image be an SVG image, since it scales well. Using other types like PNG/JPEG/GIF/BMP will work too, but is not recommended.</li>
+    <li>The image be a square image.</li>
+    <li>The base-64 encoded data is &lt;= 100KB. Bigger sizes will work too, but may take a long time to render.</li>
+  </ul>
+</aside>
+
+<h2 id="get-settings-view">Get Settings View</h2>
+
+<p>This is an optional message that the plugin may implement, should users want to configure the plugin from the GoCD admin page.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.plugin-settings.get-view</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>A JSON <a href="#the-get-settings-view-object">settings view object</a></p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;div&gt;some html&lt;/div&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<h2 id="get-plugin-configuration">Get Plugin Configuration</h2>
+
+<p>This is an optional message that the plugin may implement, should users want to configure the plugin from the GoCD admin page. This message allows the server to query a plugin about what properties are supported by this plugin.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.plugin-settings.get-configuration</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide a request body.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>A JSON <a href="#the-plugin-settings-configuration-object">plugin settings configuration object</a>.</p>
+
+<h2 id="validate-plugin-configuration">Validate Plugin Configuration</h2>
+
+<p>If a plugin requires any configuration, this message must be implemented in order to validate the configuration.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.plugin-settings.validate-configuration</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An example validation request body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"plugin-settings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"server_url"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost.com"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The request body will contain a JSON with an attribute <code class="prettyprint">plugin-settings</code>, which contains an object with the configuration keys and values that the plugin is expected to validate.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>The plugin should respond with JSON array response for each configuration key that has a validation error</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+   </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"server_url"</span><span class="p">,</span><span class="w">
+   </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Server URL cannot be localhost"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+
+<p>If any of the input keys have a validation error on them, the plugin is expected to return a list of <a href="#the-validation-error-object">validation error objects</a>. If the configuration is valid, the plugin should return an empty JSON array.</p>
+
+<h1 id="requests-to-the-gocd-server">Requests to the GoCD server</h1>
+
+<p>The plugin may make the following requests to the server using <code class="prettyprint">GoApplicationAccessor#submit(GoApiRequest)</code></p>
+
+<ul>
+<li><a href="#get-plugin-settings">Get Plugin Settings</a></li>
+<li><a href="#add-server-health-messages">Add Server Health Messages</a></li>
+</ul>
+
+<h2 id="get-plugin-settings">Get Plugin Settings</h2>
+
+<div class="highlight"><pre class="highlight java"><code><span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.annotation.Extension</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.logging.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.request.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.response.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AnalyticsPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">AnalyticsPlugin</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initializeGoApplicationAccessor</span><span class="o">(</span><span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">accessor</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="nc">GoPluginIdentifier</span> <span class="nf">pluginIdentifier</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">GoPluginIdentifier</span><span class="o">(</span><span class="s">"analytics"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"1.0"</span><span class="o">))</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="nc">PluginSettings</span> <span class="nf">getSettings</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">Gson</span> <span class="n">gson</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Gson</span><span class="o">();</span>
+    <span class="c1">// create a request</span>
+    <span class="nc">DefaultGoApiRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DefaultGoApiRequest</span><span class="o">(</span>
+      <span class="s">"go.processor.plugin-settings.get"</span><span class="o">,</span>
+      <span class="s">"1.0"</span><span class="o">,</span>
+      <span class="n">pluginIdentifier</span><span class="o">()</span>
+    <span class="o">);</span>
+
+    <span class="c1">// set the request body</span>
+    <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"plugin-id"</span><span class="o">,</span> <span class="s">"com.example.rocket.launcher"</span><span class="o">);</span>
+    <span class="n">request</span><span class="o">.</span><span class="na">setRequestBody</span><span class="o">(</span><span class="n">gson</span><span class="o">.</span><span class="na">toJson</span><span class="o">(</span><span class="n">map</span><span class="o">));</span>
+
+    <span class="c1">// submit the request</span>
+    <span class="nc">GoApiResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">.</span><span class="na">submit</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+
+    <span class="c1">// check status</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">responseCode</span><span class="o">()</span> <span class="o">!=</span> <span class="mi">200</span><span class="o">)</span> <span class="o">{</span>
+      <span class="no">LOG</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"The server sent an unexpected status code "</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="na">responseCode</span><span class="o">()</span> <span class="o">+</span> <span class="s">" with the response body "</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="na">responseBody</span><span class="o">());</span>
+    <span class="o">}</span>
+
+    <span class="c1">// parse the response, using a json parser of your choice</span>
+    <span class="k">return</span> <span class="n">gson</span><span class="o">.</span><span class="na">fromJson</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">responseBody</span><span class="o">(),</span> <span class="nc">PluginSettings</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>This messages allows a plugin to query the server to get the user configured settings for this plugin.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.processor.plugin-settings.get</code></p>
+
+<p class='request-body-heading'>Request version</p>
+
+<p>The request version must be set to <code class="prettyprint">1.0</code>.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An example request body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"plugin-id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sample-plugin-id"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>Must be a JSON object with a key <code class="prettyprint">plugin-id</code> with the value being the ID of your plugin.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The server is expected to return status <code class="prettyprint">200</code> if it could process the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"server_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://build.go.cd"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"view"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The server will send a map of settings.</p>
+
+<h2 id="add-server-health-messages">Add Server Health Messages</h2>
+<div class="highlight"><pre class="highlight java"><code><span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.annotation.Extension</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.logging.Logger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.request.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.response.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+<span class="nd">@Extension</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AnalyticsPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">AnalyticsPlugin</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initializeGoApplicationAccessor</span><span class="o">(</span><span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">accessor</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="nc">GoPluginIdentifier</span> <span class="nf">pluginIdentifier</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">GoPluginIdentifier</span><span class="o">(</span><span class="s">"analytics"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"1.0"</span><span class="o">));</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="kt">void</span> <span class="nf">addErrorsAndWarnings</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">Gson</span> <span class="n">gson</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Gson</span><span class="o">();</span>
+    <span class="c1">// create a request</span>
+    <span class="nc">DefaultGoApiRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DefaultGoApiRequest</span><span class="o">(</span>
+      <span class="s">"go.processor.server-health.add-messages"</span><span class="o">,</span>
+      <span class="s">"1.0"</span><span class="o">,</span>
+      <span class="n">pluginIdentifier</span><span class="o">()</span>
+    <span class="o">);</span>
+
+    <span class="c1">// set the request body</span>
+    <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;&gt;</span> <span class="n">messages</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+
+    <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">message1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="n">message1</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"type"</span><span class="o">,</span> <span class="s">"warning"</span><span class="o">);</span>
+    <span class="n">message1</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"message"</span><span class="o">,</span> <span class="s">"A warning message from the plugin."</span><span class="o">);</span>
+
+    <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">message2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+    <span class="n">message2</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"type"</span><span class="o">,</span> <span class="s">"error"</span><span class="o">);</span>
+    <span class="n">message2</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"message"</span><span class="o">,</span> <span class="s">"An error message from the plugin."</span><span class="o">);</span>
+
+    <span class="n">messages</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">message1</span><span class="o">);</span>
+    <span class="n">messages</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">message2</span><span class="o">);</span>
+
+    <span class="n">request</span><span class="o">.</span><span class="na">setRequestBody</span><span class="o">(</span><span class="n">gson</span><span class="o">.</span><span class="na">toJson</span><span class="o">(</span><span class="n">messages</span><span class="o">));</span>
+
+    <span class="c1">// submit the request</span>
+    <span class="nc">GoApiResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">.</span><span class="na">submit</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+
+    <span class="c1">// check status</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">responseCode</span><span class="o">()</span> <span class="o">!=</span> <span class="mi">200</span><span class="o">)</span> <span class="o">{</span>
+      <span class="no">LOG</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"The server sent an unexpected status code "</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="na">responseCode</span><span class="o">()</span> <span class="o">+</span> <span class="s">" with the response body "</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="na">responseBody</span><span class="o">());</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>This message allows a plugin to add error and warning messages to be shown in
+GoCD. Any previous messages sent by the plugin will be cleared and replaced with
+the newly specified messages (or cleared if the body is an empty list).</p>
+
+<p class='available-since'>
+  Available since v18.3.0.
+</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">go.processor.server-health.add-messages</code></p>
+
+<p class='request-body-heading'>Request version</p>
+
+<p>The request version must be set to <code class="prettyprint">1.0</code>.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>An example request body:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"warning"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A warning message from the plugin."</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"error"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"An error message from the plugin."</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+<p>Must be a JSON array made up of JSON objects as described below:</p>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">type</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>Should be either <code class="prettyprint">warning</code> or <code class="prettyprint">error</code>, corresponding to the type of message to be shown.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">message</code></td>
+<td><code class="prettyprint">String</code></td>
+<td>A message to be shown in the &ldquo;Errors and Warnings&rdquo; box.</td>
+</tr>
+</tbody></table>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The server is expected to return status <code class="prettyprint">200</code> if it could process the request. It is expected to return status <code class="prettyprint">500</code> if it failed to process the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<blockquote>
+<p>An example response body for a failure:</p>
+</blockquote>
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"An error occurred ..."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+<p>The server will respond with a single JSON object with an error message with the key <code class="prettyprint">message</code>, if it is unable to process the request. If
+successful, the response body will be empty.</p>
+
+<h1 id="analytics-js-api">Analytics JS API</h1>
+
+<blockquote>
+<p>Example HTML:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;html&gt;</span>
+  <span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;script&gt;</span>
+      <span class="c1">// Your script here</span>
+    <span class="nt">&lt;/script&gt;</span>
+  <span class="nt">&lt;/head&gt;</span>
+  ...
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div>
+
+<blockquote>
+<p>Example load using a Javascript module loading system:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight javascript"><code><span class="kd">const</span> <span class="nx">AnalyticsEndpoint</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">"</span><span class="s2">analytics-endpoint.js</span><span class="dl">"</span><span class="p">);</span>
+
+<span class="c1">// The rest of your script here...</span>
+</code></pre></div>
+
+<p>GoCD renders analytics plugin content in <a href='https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe'
+target='_blank'>sandboxed</a> iframes. Within these sandboxed iframes, the plugin content may only execute its own JS code; it has no access
+to the parent window context or cookies, and is therefore unable to make authenticated requests on the user&rsquo;s behalf.</p>
+
+<p>Because of this isolation, all communication between the parent GoCD window and the plugin iframe is via the <a
+href='https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage' target='_blank'>window.postMessage()</a> mechanism. To make the
+communication easier between GoCD and the sandboxed plugin iframes, GoCD provides the <code class="prettyprint">AnalyticsEndpoint</code> JS client to provide simple
+request-response semantics as an abstraction over the cross-origin/sandbox communication details. Please see examples in the <a href="https://github.com/gocd-contrib/analytics-skeleton-plugin/blob/master/assets/pipeline-chart.html">Analytics
+Skeleton Plugin</a> to see a usage of the
+analytics-endpoint.js API&rsquo;s.</p>
+
+<p><strong>The JS client script is automatically injected into your plugin&rsquo;s static asset root after your plugin is loaded.</strong> Loading the <code class="prettyprint">AnalyticsEndpoint</code> client in plugin scripts merely involves requiring the file <code class="prettyprint">analytics-endpoint.js</code>.</p>
+
+<h2 id="usage">Usage</h2>
+
+<p class='request-body-heading'>AnalyticsEndpoint.onInit(callback)</p>
+
+<blockquote>
+<p>Example setup:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+  <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+  <span class="nt">&lt;script&gt;</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Your code goes here to render your initial data and</span>
+    <span class="c1">// any further interactions with the GoCD parent page.</span>
+  <span class="p">});</span>
+
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Finally, set up receiving endpoint</span>
+  <span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+  ...
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div>
+
+<p>This is the entry point to all plugin code, and will execute once the frame is loaded and <code class="prettyprint">AnalyticsEndpoint.ensure()</code> has set up the receiving endpoint. The <code class="prettyprint">callback</code> argument is an initializer function that receives the following parameters:</p>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>data</strong></td>
+<td>The initial data from the <a href="#get-analytics"><code class="prettyprint">go.cd.analytics.get-analytics</code></a> JSON payload.</td>
+</tr>
+<tr>
+<td><strong>transport</strong></td>
+<td>A <a href="#the-transport-object">Transport instance</a> to provide a way to send further communication to the parent GoCD frame.</td>
+</tr>
+</tbody></table>
+
+<p class='request-body-heading'>AnalyticsEndpoint.ensure(version)</p>
+
+<p>This sets up the receiving endpoint for messages from GoCD. The <code class="prettyprint">version</code> parameter is required, and must be a supported version string. Currently, this is only <code class="prettyprint">&quot;v1&quot;</code>.</p>
+
+<h2 id="the-transport-object">The Transport Object</h2>
+
+<blockquote>
+<p>Example snippet:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight javascript"><code><span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">params</span> <span class="o">=</span> <span class="p">{</span> <span class="na">url</span><span class="p">:</span> <span class="dl">"</span><span class="s2">https://google.com</span><span class="dl">"</span> <span class="p">};</span>
+  <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-external</span><span class="dl">"</span><span class="p">,</span> <span class="nx">params</span><span class="p">).</span>
+    <span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">success! received: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span> <span class="p">}).</span>
+    <span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">failed due to: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">errors</span><span class="p">));</span> <span class="p">}).</span>
+    <span class="nx">always</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">all done here.</span><span class="dl">"</span><span class="p">);</span> <span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>The <code class="prettyprint">Transport</code> object provides an AJAX-like API to facilitate communication with GoCD. It provides a chainable callback setup, similar to
+<code class="prettyprint">jQuery.ajax</code> handlers. It has a <code class="prettyprint">request</code> method, which takes two parameters:</p>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>requestKey</td>
+<td>The request that needs to be sent to the GoCD iframe. Needs to be one of <code class="prettyprint">fetch-analytics</code>, <code class="prettyprint">link-to</code> or <code class="prettyprint">link-external</code>.</td>
+</tr>
+<tr>
+<td>parameters</td>
+<td>A parameter object which depends on the <code class="prettyprint">requestKey</code> used.</td>
+</tr>
+</tbody></table>
+
+<p>The <code class="prettyprint">request() method</code> returns a chainable object to set up <code class="prettyprint">done</code>, <code class="prettyprint">fail</code>, and <code class="prettyprint">always</code> callbacks:</p>
+
+<ol>
+<li><code class="prettyprint">done(function(data) {})</code>: Fires upon successful response from GoCD. Similar to <a href="https://api.jquery.com/deferred.done/">done() in jQuery</a>.</li>
+<li><code class="prettyprint">fail(function(errors) {})</code>: Fires upon error response from GoCD. Similar to <a href="https://api.jquery.com/deferred.fail/">fail() in jQuery</a></li>
+<li><code class="prettyprint">always(function() {})</code>: Fires after response is received, regardless of success/failure. Executes after <code class="prettyprint">done()</code> or <code class="prettyprint">fail()</code>. Similar to
+<a href="https://api.jquery.com/deferred.always/">always() in jQuery</a>.</li>
+</ol>
+
+<h3 id="request-key-fetch-analytics">Request key: <code class="prettyprint">fetch-analytics</code></h3>
+
+<blockquote>
+<p>An example message from iframe to parent window to fetch analytics:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+  <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+  <span class="nt">&lt;script&gt;</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">fetch-analytics</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">pipeline</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">metric</span><span class="p">:</span> <span class="dl">"</span><span class="s2">pipeline_duration</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">pipeline_name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">my_pipeline</span><span class="dl">"</span><span class="p">,</span>
+
+      <span class="na">user_defined_param1</span><span class="p">:</span> <span class="dl">"</span><span class="s2">something</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">user_defined_param2</span><span class="p">:</span> <span class="dl">"</span><span class="s2">something_else</span><span class="dl">"</span>
+    <span class="p">})</span>
+      <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">dataObject</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Got: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">dataObject</span><span class="p">);</span>
+      <span class="p">})</span>
+      <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
+      <span class="p">});</span>
+  <span class="p">});</span>
+
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
+  <span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+  ...
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div>
+
+<blockquote>
+<p>The API request to GoCD to fetch the analytics (for above example):</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight plaintext"><code>https://ci.example.com/go/analytics/plugin_id/pipeline/pipeline_duration?user_defined_param1=my_pipeline&amp;user_defined_param2=something_else
+</code></pre></div>
+
+<p>The plugin front-end in the iframe can send a message with key <code class="prettyprint">fetch-analytics</code> to <a href="#get-analytics">get analytics</a>
+from its plugin back-end in the GoCD server. This message can be used to implement drill-downs and other navigation between charts.</p>
+
+<p>Upon receiving this message, the parent window will make a GoCD API request to the plugin&rsquo;s <a href="#get-analytics">get analytics</a> API to fetch the
+specified analytics from the plugin. Upon receiving the response data, it will be passed to the plugin front-end in the iframe as a response
+to the <code class="prettyprint">fetch-analytics</code> call.</p>
+
+<aside class='notice'>
+  <strong>Note:</strong> The response will only contain the <code>data</code> part, and will not contain the <code>view_path</code> parameter, if sent by the plugin as a response to <a href="#get-analytics">the get-analytics</a> call.
+</aside>
+
+<p>The parameter object should contain these keys:</p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">type</code></td>
+<td>Type of the metric. Usually <code class="prettyprint">pipeline</code> or <code class="prettyprint">dashboard</code>. Depends on the <a href="#get-plugin-capabilities">capabilities</a> of the plugin.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">metric</code></td>
+<td>The ID of the metric as defined by the plugin in its <a href="#get-plugin-capabilities">capabilities</a>.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">pipeline_name</code></td>
+<td>The name of the pipeline that analytics need to be fetched for. Required only if metric type is <code class="prettyprint">pipeline</code>.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">user_defined_param1</code></td>
+<td>Any plugin-author-defined parameters (optional).</td>
+</tr>
+<tr>
+<td><code class="prettyprint">user_defined_param2</code></td>
+<td>Any plugin-author-defined parameters (optional).</td>
+</tr>
+</tbody></table>
+
+<h3 id="request-key-link-to-job-details-page">Request key: <code class="prettyprint">link-to</code> job details page</h3>
+
+<blockquote>
+<p>An example message from iframe to parent window to link to job details page -</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+  <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+  <span class="nt">&lt;script&gt;</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-to</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">link_to</span><span class="p">:</span> <span class="dl">"</span><span class="s2">job_details_page</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">pipeline_name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">my_pipeline</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">pipeline_counter</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+      <span class="na">stage_name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">my_stage</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">stage_counter</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="na">job_name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">job1</span><span class="dl">"</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Navigated to job details page!</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
+  <span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+  ...
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+}
+</code></pre></div>
+
+<blockquote>
+<p>This will be the equivalent of opening a new tab with the URL: <code class="prettyprint">http://ci.example.com/go/tab/build/detail/my_pipeline/10/my_stage/1/job1</code>.</p>
+</blockquote>
+
+<p>Any links opened directly from the plugin&rsquo;s front-end will open inside the iframe. For security reasons, the iframe cannot affect the
+navigation of the parent GoCD window directly. Instead, the iframe can send a message with the key <code class="prettyprint">link-to</code> to the
+parent window to link to one of a specific set of GoCD pages.</p>
+
+<p>The version <code class="prettyprint">v1</code> of the message supports linking to the job details page. Upon receiving this message with correct parameters the parent
+window will open the linked page in a new tab.</p>
+
+<p>To link to the job details page, the parameter object should contain these keys:</p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">link_to</code></td>
+<td>The value should be <code class="prettyprint">job_details_page</code>.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">pipeline_name</code></td>
+<td>The name of the pipeline the job is in.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">pipeline_counter</code></td>
+<td>The counter of the pipeline.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">stage_name</code></td>
+<td>The stage name the job is in.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">stage_counter</code></td>
+<td>The stage counter.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">job_name</code></td>
+<td>The name of the job.</td>
+</tr>
+</tbody></table>
+
+<h3 id="request-key-link-to-pipeline-instance-page">Request key: <code class="prettyprint">link-to</code> pipeline instance page</h3>
+
+<blockquote>
+<p>An example message from iframe to parent window to link to pipeline instance page:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+  <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+  <span class="nt">&lt;script&gt;</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-to</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">link_to</span><span class="p">:</span> <span class="dl">"</span><span class="s2">pipeline_instance_page</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">pipeline_name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">my_pipeline</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">pipeline_counter</span><span class="p">:</span> <span class="mi">10</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Navigated to pipeline instance page!</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
+  <span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+  ...
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+}
+</code></pre></div>
+
+<blockquote>
+<p>This will be the equivalent of opening a new tab with the URL: <code class="prettyprint">http://ci.example.com/go/pipelines/my_pipeline/10/my_first_stage/1</code>.</p>
+</blockquote>
+
+<p>Any links opened directly from the plugin&rsquo;s front-end will open inside the iframe. For security reasons, the iframe cannot affect the
+navigation of the parent GoCD window directly. Instead, the iframe can send a message with the key <code class="prettyprint">link-to</code> to the
+parent window to link to one of a specific set of GoCD pages.</p>
+
+<p>The version <code class="prettyprint">v1</code> of the message supports linking to first stage of a Pipeline Instance. Upon receiving this message
+with correct parameters the parent window will open the linked page in a new tab.</p>
+
+<p>To link to the pipeline instance page, the parameter object should contain these keys:</p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">link_to</code></td>
+<td>The value should be <code class="prettyprint">pipeline_instance_page</code>.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">pipeline_name</code></td>
+<td>The name of the pipeline to link to.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">pipeline_counter</code></td>
+<td>The counter of the pipeline.</td>
+</tr>
+</tbody></table>
+
+<h3 id="request-key-link-external">Request key: <code class="prettyprint">link-external</code></h3>
+
+<p>Any links opened directly from the plugin&rsquo;s front-end will open inside the iframe. For security reasons, the iframe cannot affect the
+navigation of the parent GoCD window directly. Instead, the iframe can send a message with the key <code class="prettyprint">link-external</code> to the parent window to
+link to a page outside of GoCD. The parent window will open the page in a new tab.</p>
+
+<blockquote>
+<p>An example message from iframe to parent window to link to an external page:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+  <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+  <span class="nt">&lt;script&gt;</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-external</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">url</span><span class="p">:</span> <span class="dl">"</span><span class="s2">https://url.link.to.external.page</span><span class="dl">"</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Navigated to the specified URL!</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
+  <span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+  ...
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+}
+</code></pre></div>
+
+<p>The parameter object should contain:</p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">url</code></td>
+<td>The URL to navigate to.</td>
+</tr>
+</tbody></table>
+
+<h1 id="request-response-json-objects">Request/Response JSON Objects</h1>
+
+<p><a id='the-get-settings-view-object'></a></p>
+
+<h3 id="the-settings-view-object">The Settings View Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the settings view object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"template"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;div class=</span><span class="se">\"</span><span class="s2">form_item_block</span><span class="se">\"</span><span class="s2">&gt;...&lt;/div&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">template</code></td>
+<td>String</td>
+<td>A string containing an HTML AngularJS based view.</td>
+</tr>
+</tbody></table>
+
+<p>This template is an <a href="https://angularjs.org">AngularJS</a> based template.</p>
+
+<p>GoCD uses Angular JS as its template engine for the plugin UI. This allows plugin authors to use a limited set of AngularJS features to specify how the UI of their plugins looks.</p>
+
+<aside class='notice'>
+  <strong>Note:</strong> Some plugin endpoints, like the Package Repository plugin, do not use this for their view.
+</aside>
+
+<div style='clear: both;'></div>
+
+<h4 id="getting-started-with-angularjs-based-templates">Getting started with AngularJS based templates</h4>
+
+<blockquote>
+<p>Given a configuration:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;configuration&gt;</span>
+  <span class="nt">&lt;property&gt;</span>
+    <span class="nt">&lt;key&gt;</span>username<span class="nt">&lt;/key&gt;</span>
+    <span class="nt">&lt;value&gt;</span>alice<span class="nt">&lt;/username&gt;</span>
+  <span class="nt">&lt;/property&gt;</span>
+<span class="nt">&lt;/configuration&gt;</span>
+</code></pre></div>
+
+<blockquote>
+<p>This gets converted into the following JSON representation in the browser:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alice"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<blockquote>
+<p>The AngularJS template is expected to bind to the JSON object shown above:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form_item_block"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Username:<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">'asterix'</span><span class="nt">&gt;</span>*<span class="nt">&lt;/span&gt;&lt;/label&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">ng-model=</span><span class="s">"username"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div>
+
+<p>When an Angular template is used in a Go plugin, to define the configuration UI, the configuration key which is stored in the configuration XML is used everywhere and is expected to be consistent. Since Angular works off of JSON, GoCD will make sure that the key in the JSON provided to the Angular template is the same as the key in the configuration XML.</p>
+
+<p>Suppose the key of the configuration property stored in the XML is &ldquo;username&rdquo;, with value, &ldquo;alice&rdquo;, then Go will make sure that the value is available to the template as &ldquo;username&rdquo; when used in an Angular-specific HTML attribute like &ldquo;ng-model&rdquo;.</p>
+
+<p><img src="../images/plugin_angular.png" alt="Plugin Angular Architecture" /></p>
+
+<p>So, the name &ldquo;foobar&rdquo; needs to be the same across the configuration XML, the Angular template as well as in any code that the plugin has.</p>
+
+<div style='clear: both;'></div>
+
+<h4 id="showing-validation-errors-in-the-ui">Showing validation errors in the UI</h4>
+
+<blockquote>
+<p>We use some simple string replacement<br/>
+to substitute <code class="prettyprint">GOINPUTNAME</code> with a unique identifier<br/>
+for your plugin in order to render<br/>
+any server side errors</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form_item_block"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;label&gt;</span>Username:<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">'asterix'</span><span class="nt">&gt;</span>*<span class="nt">&lt;/span&gt;&lt;/label&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">ng-model=</span><span class="s">"username"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"form_error"</span> <span class="na">ng-show=</span><span class="s">"GOINPUTNAME[username].$error.server"</span><span class="nt">&gt;</span>
+    {{ GOINPUTNAME[username].$error.server}}
+  <span class="nt">&lt;/span&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div>
+
+<p>In case of validation errors returned by <code class="prettyprint">go.plugin-settings.validate-configuration</code>, the error messages needs to be populated on the UI, use the snippet here to show the validation errors.</p>
+
+<p><a id='the-plugin-settings-configuration-object'></a></p>
+
+<h3 id="the-plugin-settings-configuration-object">The Plugin Settings Configuration Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the plugin settings configuration object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"server_url"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Server URL"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Username"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"password"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Password"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">display-name</code></td>
+<td>String</td>
+<td>The name of the property.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">default-value</code></td>
+<td>String</td>
+<td>The default value of the property.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">display-order</code></td>
+<td>String</td>
+<td>A string containing a numerical value.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">required</code></td>
+<td>Boolean</td>
+<td>If the field is mandatory.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">secure</code></td>
+<td>Boolean</td>
+<td>If the data in the field should be stored encrypted.</td>
+</tr>
+</tbody></table>
+
+<p><a id='the-plugin-settings-configuration-object'></a></p>
+
+<h3 id="the-validation-error-object">The Validation Error Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the validation error object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"email_address"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Email address is invalid"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Password must be provided"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">key</code></td>
+<td>String</td>
+<td>The name of configuration key that has an error.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">message</code></td>
+<td>String</td>
+<td>The error message associated with that key.</td>
+</tr>
+</tbody></table>
+
+<p><a id='the-image-object'></a></p>
+
+<h3 id="the-image-object">The Image Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the image object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"content_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"image/svg+xml"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="s2">"...."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">content_type</code></td>
+<td>String</td>
+<td>A valid <a href="http://www.iana.org/assignments/media-types/media-types.xhtml#image">content type</a> for the image. Please make sure the content type is supported by most browsers.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">data</code></td>
+<td>String</td>
+<td>A <a href="https://en.wikipedia.org/wiki/Base64">base-64</a> encoded (single-line non-chunking) byte array of the byte-sequence that composes the image.</td>
+</tr>
+</tbody></table>
+
+      </div>
+      <div class="dark-box">
+          <div class="lang-selector">
+          </div>
+      </div>
+    </div>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-48357651-2', 'auto');
+  ga('send', 'pageview');
+</script>
+  </body>
+</html>
