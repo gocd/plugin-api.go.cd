@@ -137,7 +137,7 @@
 
 <h2 id="current-version">Current Version</h2>
 
-<p>This document is for version 2.0 of the Config Repositories endpoint.</p>
+<p>This document is for version 3.0 of the Config Repositories endpoint.</p>
 
 <h2 id="introduction">Introduction</h2>
 
@@ -371,6 +371,7 @@
 <li><a href="#parse-directory">Parse directory</a></li>
 <li><a href="#parse-content">Parse content</a></li>
 <li><a href="#pipeline-export">Pipeline export</a></li>
+<li><a href="#get-config-files">Get config files</a></li>
 </ul>
 
 <p>These are general purpose messages that a plugin may implement to allow users to configure the plugin through the browser.</p>
@@ -1092,7 +1093,69 @@ essentially the reverse of the <a href="#parse-directory"><code class="prettypri
 
 <p>Plugin responses must also suggest a filename for the exported content. This is used by GoCD to construct a <code class="prettyprint">Content-Disposition</code> header for REST API responses.</p>
 
-<h2 id="get-settings-view">Get Settings View</h2>
+<h2 id="get-config-files">Get Config Files</h2>
+
+<p>This message is a request to the plugin to parse the given directory and return all the configuration files found.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">config-files</code></p>
+
+<p class='request-body-heading'>Request body</p>
+
+<blockquote>
+<p>Given the following config XML snippet —</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;config-repos&gt;</span>
+  <span class="nt">&lt;config-repo</span> <span class="na">pluginId=</span><span class="s">"your.plugin.id"</span> <span class="na">id=</span><span class="s">"some-unique-id"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;git</span> <span class="na">url=</span><span class="s">"https://some.repo"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;configuration&gt;</span>
+      <span class="nt">&lt;property&gt;</span>
+        <span class="nt">&lt;key&gt;</span>some.key<span class="nt">&lt;/key&gt;</span>
+        <span class="nt">&lt;value&gt;</span>some.value<span class="nt">&lt;/value&gt;</span>
+      <span class="nt">&lt;/property&gt;</span>
+    <span class="nt">&lt;/configuration&gt;</span>
+  <span class="nt">&lt;/config-repo&gt;</span>
+</code></pre></div>
+
+<blockquote>
+<p>The plugin will receive the following JSON body —</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"directory"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/absolute/path/to/directory/with/configs"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"configurations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"some.key"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"some.value"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p>The request body will contain a JSON object with an attribute <code class="prettyprint">directory</code>, which points to a directory of the specified
+material repository. It will also contain an attribute <code class="prettyprint">configuration</code> which contains the specified configuration. Note:
+This is not the configuration in the plugin settings page.</p>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response body</p>
+
+<blockquote>
+<p>An example response body:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"target_version"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"files"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="s2">"build.gocd.yml"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"deploy.gocd.yml"</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div><h2 id="get-settings-view">Get Settings View</h2>
 
 <p>This is an optional message that the plugin may implement, should users want to configure the plugin from the GoCD admin page.</p>
 
@@ -1251,7 +1314,9 @@ essentially the reverse of the <a href="#parse-directory"><code class="prettypri
 
 <div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
   </span><span class="nl">"supports_pipeline_export"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
-  </span><span class="nl">"supports_parse_content"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+  </span><span class="nl">"supports_parse_content"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"supports_list_config_files"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"supports_user_defined_properties"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre></div>
 
@@ -1275,6 +1340,16 @@ essentially the reverse of the <a href="#parse-directory"><code class="prettypri
 <td><code class="prettyprint">supports_parse_content</code></td>
 <td><code class="prettyprint">boolean</code></td>
 <td>Whether this plugin supports the <a href="#parse-content"><code class="prettyprint">parse-content</code></a> request.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">supports_list_config_files</code></td>
+<td><code class="prettyprint">boolean</code></td>
+<td>Whether this plugin supports the <a href="#get-config-files"><code class="prettyprint">config-files</code></a> request.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">supports_user_defined_properties</code></td>
+<td><code class="prettyprint">boolean</code></td>
+<td>Whether this plugin supports defining of configuration properties by the user.</td>
 </tr>
 </tbody></table>
 

@@ -162,6 +162,17 @@ interface is simple enough for anyone to build plugins in other languages using 
 
 <h2 id="changes-in-gocd-20-8-0">Changes in GoCD 20.8.0</h2>
 
+<h3 id="config-repo-changes">Config Repo (Changes)</h3>
+
+<ul>
+<li>A new version 3 of the <a href="config-repo">Config Repo</a> extension is available. This version introduces the following,
+
+<ul>
+<li>A new message endpoint <a href="config-repo#get-config-files">Get config files</a></li>
+<li>Support for additional <a href="config-repo#get-plugin-capabilities">Plugin Capablities</a> <code class="prettyprint">supports_list_config_files</code> and <code class="prettyprint">supports_user_defined_properties</code></li>
+</ul></li>
+</ul>
+
 <h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
 
 <ul>
@@ -170,6 +181,7 @@ interface is simple enough for anyone to build plugins in other languages using 
 <li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
 <li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
 <li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+<li>The Config Repo Extension version 2 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 3 of the Config Repo Extension.</li>
 </ul>
 
 <h2 id="changes-in-gocd-20-7-0">Changes in GoCD 20.7.0</h2>
