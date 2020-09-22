@@ -5,6 +5,7 @@ In order to implement config repository extension point the following message mu
 * [Parse directory](#parse-directory)
 * [Parse content](#parse-content)
 * [Pipeline export](#pipeline-export)
+* [Get config files](#get-config-files)
 
 These are general purpose messages that a plugin may implement to allow users to configure the plugin through the browser.
 

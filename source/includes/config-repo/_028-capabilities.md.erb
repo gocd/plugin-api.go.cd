@@ -17,7 +17,9 @@ Server sends request with `Empty` request body.
 ```json
 {
   "supports_pipeline_export": true,
-  "supports_parse_content": true
+  "supports_parse_content": true,
+  "supports_list_config_files": false,
+  "supports_user_defined_properties": true
 }
 ```
 
@@ -25,9 +27,11 @@ The response body will contain the following JSON attributes:
 
 <p class='attributes-table-follows'></p>
 
-| Key                        | Type      | Description                                                                     |
-| -------------------------- | --------- | ------------------------------------------------------------------------------- |
-| `supports_pipeline_export` | `boolean` | Whether this plugin supports the [`pipeline-export`](#pipeline-export) request. |
-| `supports_parse_content`   | `boolean` | Whether this plugin supports the [`parse-content`](#parse-content) request.     |
+| Key                        | Type      | Description                                                                      |
+| -------------------------- | --------- | -------------------------------------------------------------------------------- |
+| `supports_pipeline_export` | `boolean` | Whether this plugin supports the [`pipeline-export`](#pipeline-export) request.  |
+| `supports_parse_content`   | `boolean` | Whether this plugin supports the [`parse-content`](#parse-content) request.      |
+| `supports_list_config_files`   | `boolean` | Whether this plugin supports the [`config-files`](#get-config-files) request.|
+| `supports_user_defined_properties`   | `boolean` | Whether this plugin supports defining of configuration properties by the user.    |
 
 The plugin is expected to return status `200` if it can understand the request.

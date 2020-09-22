@@ -1,5 +1,12 @@
 ## Changes in GoCD 20.8.0
 
+### Config Repo (Changes)
+
+ - A new version 3 of the [Config Repo](config-repo) extension is available. This version introduces the following,
+   - A new message endpoint [Get config files](config-repo#get-config-files)
+   - Support for additional [Plugin Capablities](config-repo#get-plugin-capabilities) `supports_list_config_files` and `supports_user_defined_properties`
+
+
 ### Deprecations (across extensions)
 
  - Version 1 of "Log Message to Job Console" has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of "Log Message to Job Console".
@@ -7,3 +14,4 @@
  - The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.
  - The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.
  - The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.
+ - The Config Repo Extension version 2 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 3 of the Config Repo Extension.
