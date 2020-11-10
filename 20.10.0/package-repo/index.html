@@ -1,0 +1,869 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name ="description" content="Extend GoCD's functionality. Implement GoCD plugins for SCMs, tasks, notifications, authentication, package repositories, elastic agents and authorization." />
+    <meta name ="keywords" content="gocd plugins, plugins for gocd, extension points, open source gocd, open source continuous delivery" />
+    <link href="../images/gocd.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href="../images/gocd.png" rel="apple-touch-icon" type="image/png" size="192x192" />
+    <title>GoCD Package Repository Plugin API Reference</title>
+
+    <style>
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #f8f8f2;
+  background-color: #272822;
+}
+.highlight .err {
+  color: #272822;
+  background-color: #f92672;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #f4bf75;
+}
+.highlight .nt {
+  color: #f4bf75;
+}
+.highlight .o, .highlight .ow {
+  color: #f8f8f2;
+}
+.highlight .p, .highlight .pi {
+  color: #f8f8f2;
+}
+.highlight .gi {
+  color: #a6e22e;
+}
+.highlight .gd {
+  color: #f92672;
+}
+.highlight .gh {
+  color: #66d9ef;
+  background-color: #272822;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #ae81ff;
+}
+.highlight .kc {
+  color: #fd971f;
+}
+.highlight .kt {
+  color: #fd971f;
+}
+.highlight .kd {
+  color: #fd971f;
+}
+.highlight .s, .highlight .sa, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #a6e22e;
+}
+.highlight .sr {
+  color: #a1efe4;
+}
+.highlight .si {
+  color: #cc6633;
+}
+.highlight .se {
+  color: #cc6633;
+}
+.highlight .nn {
+  color: #f4bf75;
+}
+.highlight .nc {
+  color: #f4bf75;
+}
+.highlight .no {
+  color: #f4bf75;
+}
+.highlight .na {
+  color: #66d9ef;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #a6e22e;
+}
+.highlight .ss {
+  color: #a6e22e;
+}
+    </style>
+    <link href="../stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="../stylesheets/print.css" rel="stylesheet" media="print" />
+
+      <script src="../javascripts/all.js"></script>
+
+
+      <script>
+        $(function() {
+          setupLanguages([]);
+        });
+      </script>
+  </head>
+
+  <body class="package-repo package-repo_index" data-languages="[]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="../images/navbar.png" alt="Navbar" />
+      </span>
+    </a>
+    <div class="tocify-wrapper">
+      <a href="../"><img src="../images/logo.png" alt="Logo" /></a>
+        <div class="lang-selector">
+        </div>
+      <div class="version-switcher">
+        <span class="version-label">Switch version:</span>
+        <select class="version"></select>
+      </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      <div id="toc">
+      </div>
+        <ul class="toc-footer">
+            <li><a href='https://github.com/gocd/plugin-api.go.cd'>Edit this guide on GitHub</a></li>
+            <li><a href='https://api.gocd.org'>GoCD API Documentation</a></li>
+            <li><a href='https://docs.gocd.org'>GoCD User Documentation</a></li>
+        </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id="package-repository-material-plugins">Package Repository Material Plugins</h1>
+
+<p>The Package Repository extension endpoint allows plugin authors to extend GoCD and integrate it package repositories.</p>
+
+<p>GoCD&rsquo;s user documentation has an overview of package repository material plugins. Please see <a href="https://docs.gocd.org/current/extension_points/package_repository_extension.html">that</a>.</p>
+
+<p><a href="https://github.com/gocd/gocd-yum-repository-poller-plugin">A sample package repository material plugin - YUM</a></p>
+
+<p><a href="https://github.com/gocd/sample-plugins/tree/master/package-material">A skeleton package repository material plugin</a></p>
+
+<h2 id="extension-information">Extension information</h2>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>Availability</strong></td>
+<td>GoCD version 14.4.0 onwards</td>
+</tr>
+<tr>
+<td><strong>Extension Name</strong></td>
+<td><code class="prettyprint">package-repository</code></td>
+</tr>
+<tr>
+<td><strong>Extension API Version</strong></td>
+<td><code class="prettyprint">1.0</code></td>
+</tr>
+</tbody></table>
+
+<h1 id="requests-from-the-gocd-server">Requests from the GoCD server</h1>
+
+<p>In order to implement a SCM extension endpoint the following messages must be implemented by the plugin.</p>
+
+<ul>
+<li><a href="#repository-configuration">Repository Configuration</a></li>
+<li><a href="#package-configuration">Package Configuration</a></li>
+<li><a href="#validate-repository-configuration">Validate Repository Configuration</a></li>
+<li><a href="#validate-package-configuration">Validate Package Configuration</a></li>
+<li><a href="#check-repository-connection">Check Repository Connection</a></li>
+<li><a href="#check-package-connection">Check Package Connection</a></li>
+<li><a href="#latest-revision">Latest Package Revision</a></li>
+<li><a href="#latest-revision-since">Latest Package Revision Since</a></li>
+</ul>
+
+<h2 id="repository-configuration">Repository Configuration</h2>
+
+<p>This message is sent by the server, when it wants to know what properties need to be stored in the configuration, for this plugin and this
+ repository. It also uses this information to create a view, for the user to provide information about the repository.</p>
+
+<p>The plugin will receive a request with following information.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">repository-configuration</code></p>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>The server will not provide any parameters.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>The server will not provide any headers.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide request body.</p>
+
+<blockquote>
+<p>Example response body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"REPO_URL"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Repository URL"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"USERNAME"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"part-of-identity"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"User"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"PASSWORD"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"part-of-identity"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Password"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>The plugin is expected to return an object containing the configuration property along with <a href="#the-repository-configuration-response-object">repository configuration object</a></p>
+
+<h2 id="package-configuration">Package Configuration</h2>
+
+<p>This message is sent by the server, when it wants to know what properties need to be stored in the configuration, for this plugin and for this package. It also uses this information to create a view, for the user to provide information about the package.</p>
+
+<p>The plugin will receive a request with following information.</p>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">package-configuration</code></p>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>The server will not provide any parameters.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>The server will not provide any headers.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>The server will not provide request body.</p>
+
+<blockquote>
+<p>Example response body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"Field_1"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Package Spec"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"default-value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"DEF"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"part-of-identity"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"Field_2"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Field 2"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"default-value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ABC"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"part-of-identity"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>The plugin is expected to return an object containing the configuration property along with <a href="#the-package-configuration-response-object">package configuration object</a></p>
+
+<h2 id="validate-repository-configuration">Validate Repository Configuration</h2>
+
+<p>The plugin will receive request with following information.</p>
+
+<blockquote>
+<p>Example request body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"repository-configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"REPO_URL"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost.com"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"USERNAME"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"PASSWORD"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">validate-repository-configuration</code></p>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>The server will not provide any parameters.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>The server will not provide any headers.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>This contains information about the <a href="#the-repository-configuration-response-object">repository-level configuration</a> provided by the user. The keys in the maps correspond to the keys provided by the plugin, as a part of the response to <a href="#repository-configuration">&ldquo;Repository Configuration&rdquo;</a> message.</p>
+
+<blockquote>
+<p>Example response body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"REPO_URL"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Repository url not specified"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RANDOM"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Unsupported key(s) found : RANDOM. Allowed key(s) are : REPO_URL, USERNAME, PASSWORD"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>The plugin is expected to send a response, which contains a list of errors in the repository configuration, one message for every key in the request. It can also send an empty list, that is <code class="prettyprint">[]</code>, if the configuration is valid.</p>
+
+<h2 id="validate-package-configuration">Validate Package Configuration</h2>
+
+<p>The plugin will receive request with following information.</p>
+
+<blockquote>
+<p>Example request body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"repository-configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"REPO_URL"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost.com"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"USERNAME"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"PASSWORD"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"package-configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"PACKAGE_SPEC"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sample-package-1.0"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">validate-package-configuration</code></p>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>The server will not provide any parameters.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>The server will not provide any headers.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>This contains information about both the <a href="#the-repository-configuration-response-object">repository-level configuration</a> and <a href="#the-package-configuration-response-object">package-level configuration</a> provided by the user. The keys in the maps correspond to the keys provided by the plugin, as a part of the response to <a href="#repository-configuration">&ldquo;Repository Configuration&rdquo;</a> and <a href="#package-configuration">&ldquo;Package Configuration&rdquo;</a> messages.</p>
+
+<blockquote>
+<p>Example response body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PACKAGE_SPEC"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Package spec not specified"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RANDOM"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Unsupported key(s) found: RANDOM. Allowed key(s) are: PACKAGE_SPEC"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>The plugin is expected to send a response, which contains a list of errors in the package configuration, one message for every key in the request. It can also send an empty list, that is <code class="prettyprint">[]</code>, if the configuration is valid.</p>
+
+<h2 id="check-repository-connection">Check Repository Connection</h2>
+
+<p>The plugin will receive request with following information.</p>
+
+<blockquote>
+<p>Example request body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"repository-configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"REPO_URL"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost.com"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"USERNAME"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"PASSWORD"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">check-repository-connection</code></p>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>The server will not provide any parameters.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>The server will not provide any headers.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>This contains information about the <a href="#the-repository-configuration-response-object">repository-level configuration</a> provided by the user. The keys in the maps correspond to the keys provided by the plugin, as a part of the response to <a href="#repository-configuration">&ldquo;Repository Configuration&rdquo;</a> message.</p>
+
+<blockquote>
+<p>Example response body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"messages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="s2">"Successfully connected to repository url provided"</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>The plugin is expected to send a response, which contains a status (&ldquo;success&rdquo; or &ldquo;failure&rdquo;), and a list of error messages. This represents whether a connection was successfully made, to the repository specified in the request.</p>
+
+<h2 id="check-package-connection">Check Package Connection</h2>
+
+<p>The plugin will receive request with following information.</p>
+
+<blockquote>
+<p>Example request body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"repository-configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"REPO_URL"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost.com"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"USERNAME"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"PASSWORD"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"package-configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"PACKAGE_SPEC"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sample-package-1.0"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">check-package-connection</code></p>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>The server will not provide any parameters.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>The server will not provide any headers.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>This contains information about both the <a href="#the-repository-configuration-response-object">repository-level configuration</a> and <a href="#the-package-configuration-response-object">package-level configuration</a> provided by the user. The keys in the maps correspond to the keys provided by the plugin, as a part of the response to <a href="#repository-configuration">&ldquo;Repository Configuration&rdquo;</a> and <a href="#package-configuration">&ldquo;Package Configuration&rdquo;</a> messages.</p>
+
+<blockquote>
+<p>Example response body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"messages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="s2">"Successfully found package abc.rpm"</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>The plugin is expected to send a response, which contains a status (&ldquo;success&rdquo; or &ldquo;failure&rdquo;), and a list of error messages. This represents whether a connection was successfully made, to find the package specified in the repository.</p>
+
+<h2 id="latest-revision">Latest Revision</h2>
+
+<p>The plugin will receive request with following information.</p>
+
+<blockquote>
+<p>Example request body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"repository-configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"REPO_URL"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost.com"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"USERNAME"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"PASSWORD"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"package-configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"PACKAGE_SPEC"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sample-package-1.0"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">latest-revision</code></p>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>The server will not provide any parameters.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>The server will not provide any headers.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>This contains information about both the <a href="#the-repository-configuration-response-object">repository-level configuration</a> and <a href="#the-package-configuration-response-object">package-level configuration</a> provided by the user. The keys in the maps correspond to the keys provided by the plugin, as a part of the response to <a href="#repository-configuration">&ldquo;Repository Configuration&rdquo;</a> and <a href="#package-configuration">&ldquo;Package Configuration&rdquo;</a> messages.</p>
+
+<aside class="notice">
+  <strong>Note:</strong> It is prudent to validate these details before using them, because direct editing of GoCD&rsquo;s configuration XML file does not cause <a href="#validate-package-configuration">Validate Package Configuration</a> message to be sent to the plugin. So, the information sent to this call might not be validated by the plugin.
+</aside>
+
+<blockquote>
+<p>Example response body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"revision"</span><span class="p">:</span><span class="w"> </span><span class="s2">"abc-10.2.1.rpm"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2011-07-14T19:43:37.100Z"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"some-user"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"revisionComment"</span><span class="p">:</span><span class="w"> </span><span class="s2">"comment"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"trackbackUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:9999"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"VERSION"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5.3.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"LOCATION"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://www.sample.org/location/of/package"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"DATA-THREE"</span><span class="p">:</span><span class="w"> </span><span class="s2">"data-three-value"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>The plugin is expected to send a response, which contains information about the latest revision it can find of the package specified by the information in the request. It can send an empty response (<code class="prettyprint">{}</code>) to specify that it could not find a suitable package.</p>
+
+<p>Almost all the fields expected in this response are explained in this <a href="https://docs.gocd.org/current/extension_points/package_repository_extension.html#package-information-display">part of the user documentation</a>. The extra map, named &ldquo;data&rdquo; in the response, can be filled with custom keys and values, which will be made available to the agent, as environment variables, when a job contains this plugin as a material.</p>
+
+<h2 id="latest-revision-since">Latest Revision Since</h2>
+
+<p>The plugin will receive request with following information.</p>
+
+<blockquote>
+<p>Example request body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"repository-configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"REPO_URL"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost.com"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"USERNAME"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"PASSWORD"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"password"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"package-configuration"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"PACKAGE_SPEC"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sample-package-1.0"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"previous-revision"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"revision"</span><span class="p">:</span><span class="w"> </span><span class="s2">"abc-10.2.1.rpm"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2011-07-14T19:43:37.100Z"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"VERSION"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5.3.0"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"LOCATION"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://www.sample.org/location/of/package"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"DATA-THREE"</span><span class="p">:</span><span class="w"> </span><span class="s2">"data-three-value"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='request-name-heading'>Request name</p>
+
+<p><code class="prettyprint">latest-revision-since</code></p>
+
+<p class='request-body-heading'>Request parameters</p>
+
+<p>The server will not provide any parameters.</p>
+
+<p class='request-body-heading'>Request headers</p>
+
+<p>The server will not provide any headers.</p>
+
+<p class='request-body-heading'>Request body</p>
+
+<p>This request is very similar to the request of the <a href="#latest-revision">&ldquo;Latest Revision&rdquo; message</a>. This contains information about both the <a href="#the-repository-configuration-response-object">repository-level configuration</a> and <a href="#the-package-configuration-response-object">package-level configuration</a> provided by the user. The keys in the maps correspond to the keys provided by the plugin, as a part of the response to <a href="#repository-configuration">&ldquo;Repository Configuration&rdquo;</a> and <a href="#package-configuration">&ldquo;Package Configuration&rdquo;</a> messages.</p>
+
+<p>Along with that information, this request contains information about the previous revision of the package that GoCD knows about. Compare the &ldquo;previous-revision&rdquo; data of the example request shown below, with the response of the <a href="#latest-revision">&ldquo;Latest Revision&rdquo; message</a> to understand this.</p>
+
+<aside class="notice">
+  <strong>Note:</strong> It is prudent to validate these details before using them, because direct editing of GoCD&rsquo;s configuration XML file does not cause <a href="#validate-package-configuration">Validate Package Configuration</a> message to be sent to the plugin. So, the information sent to this call might not be validated by the plugin.
+</aside>
+
+<blockquote>
+<p>Example response body</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"revision"</span><span class="p">:</span><span class="w"> </span><span class="s2">"abc-10.2.2.rpm"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2011-07-14T19:45:37.100Z"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"some-user"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"revisionComment"</span><span class="p">:</span><span class="w"> </span><span class="s2">"comment 2"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"trackbackUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:9999"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"dataKeyOne"</span><span class="p">:</span><span class="w"> </span><span class="s2">"data-value-one-1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"dataKeyTwo"</span><span class="p">:</span><span class="w"> </span><span class="s2">"data-value-two-2"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='response-code-heading'>Response code</p>
+
+<p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
+
+<p class='response-body-heading'>Response Body</p>
+
+<p>Just as with the &ldquo;Latest Revision&rdquo; message, the plugin is expected to send a response, which contains information about the latest revision it can find of the package specified by the information in the request. The difference here, is that it needs to find a revision of the package which is greater than the one specified in the request. It can send an empty response (<code class="prettyprint">{}</code>) to specify that it could not find a suitable package (for instance, if there has been no change, and the latest revision is still the one specified in the request).</p>
+
+<p>Almost all the fields expected in this response are explained in this <a href="https://docs.gocd.org/current/extension_points/package_repository_extension.html#package-information-display">part of the user documentation</a>. The extra map, named &ldquo;data&rdquo; in the response, can be filled with custom keys and values, which will be made available to the agent, as environment variables, when a job contains this plugin as a material.</p>
+
+<h1 id="request-response-json-objects">Request/Response JSON Objects</h1>
+
+<p><a id='the-repository-configuration-response-object'></a></p>
+
+<h3 id="the-repository-configuration-response-object">The Repository Configuration Response Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the repository configuration response object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"REPO_URL"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Repository URL"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"USERNAME"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"part-of-identity"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"User"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"PASSWORD"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"part-of-identity"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Password"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">display-name</code></td>
+<td>String</td>
+<td>This option is used in the configuration UI, as a label of the input element.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">display-order</code></td>
+<td>Integer</td>
+<td>This option is used in the configuration UI, to decide on the order in which the fields specified here need to be displayed.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">default-value</code></td>
+<td>String</td>
+<td>A value to be used as the default if the user provides no value.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">secure</code></td>
+<td>Boolean</td>
+<td>If the value should be stored in an encrypted form in the <code class="prettyprint">cruise-config.xml</code> file.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">part-of-identity</code></td>
+<td>Boolean</td>
+<td>Should the data for this field (provided by the user) be considered part of the identity of this material? Another way to think about this is: &ldquo;If the user changes the value of this property, should GoCD consider this a new material?&rdquo;. A good example for a property to be considered a part-of-identity is the URL (if the URL changes, it&rsquo;s probably a different material). An example of a property which should not be considered part-of-identity is &ldquo;password&rdquo; (if the password or username changes, then it&rsquo;s probably not a completely different material).</td>
+</tr>
+<tr>
+<td><code class="prettyprint">required</code></td>
+<td>Boolean</td>
+<td>Whether the field is required.</td>
+</tr>
+</tbody></table>
+
+<p><a id='the-package-configuration-response-object'></a></p>
+
+<h3 id="the-package-configuration-response-object">The Package Configuration Response Object</h3>
+
+<blockquote>
+<p>Here&rsquo;s an example of the package configuration response object:</p>
+</blockquote>
+
+<div class="highlight"><pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"Field_1"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Package Spec"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"default-value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"DEF"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"part-of-identity"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"Field_2"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"display-name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Field 2"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"display-order"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"default-value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ABC"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"secure"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"part-of-identity"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">display-name</code></td>
+<td>String</td>
+<td>This option is used in the configuration UI, as a label of the input element.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">display-order</code></td>
+<td>Integer</td>
+<td>This option is used in the configuration UI, to decide on the order in which the fields specified here need to be displayed.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">default-value</code></td>
+<td>String</td>
+<td>A value to be used as the default if the user provides no value.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">secure</code></td>
+<td>Boolean</td>
+<td>If the value should be stored in an encrypted form in the <code class="prettyprint">cruise-config.xml</code> file.</td>
+</tr>
+<tr>
+<td><code class="prettyprint">part-of-identity</code></td>
+<td>Boolean</td>
+<td>Should the data for this field (provided by the user) be considered part of the identity of this material? Another way to think about this is: &ldquo;If the user changes the value of this property, should GoCD consider this a new material?&rdquo;. A good example for a property to be considered a part-of-identity is the URL (if the URL changes, it&rsquo;s probably a different material). An example of a property which should not be considered part-of-identity is &ldquo;password&rdquo; (if the password or username changes, then it&rsquo;s probably not a completely different material).</td>
+</tr>
+<tr>
+<td><code class="prettyprint">required</code></td>
+<td>Boolean</td>
+<td>Whether the field is required.</td>
+</tr>
+</tbody></table>
+
+      </div>
+      <div class="dark-box">
+          <div class="lang-selector">
+          </div>
+      </div>
+    </div>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-48357651-2', 'auto');
+  ga('send', 'pageview');
+</script>
+  </body>
+</html>
