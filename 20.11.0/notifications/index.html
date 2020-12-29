@@ -135,6 +135,30 @@
       <div class="content">
         <h1 id="notification-plugins">Notification Plugins</h1>
 
+<h2 id="extension-information">Extension Information</h2>
+
+<p class='attributes-table-follows'></p>
+
+<table><thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>Availability</strong></td>
+<td>GoCD version 18.9.0 onwards</td>
+</tr>
+<tr>
+<td><strong>Extension Name</strong></td>
+<td><code class="prettyprint">notification</code></td>
+</tr>
+<tr>
+<td><strong>Extension API Version</strong></td>
+<td><code class="prettyprint">4.0</code></td>
+</tr>
+</tbody></table>
+
 <h2 id="current-version">Current Version</h2>
 
 <p>This document is for version 4.0 (the latest) of the notification endpoint.</p>
@@ -144,226 +168,6 @@
 <p>Notification extension endpoint allows GoCD to send notifications about builds and agent state changes over various channels.</p>
 
 <p>If you&rsquo;re looking to start away with a basic template for notification plugins, we recommend forking this <a href="https://github.com/gocd-contrib/notification-skeleton-plugin">github repository</a>.</p>
-
-<h1 id="getting-started">Getting started</h1>
-
-<p>Plugins in GoCD are implemented in Java and packaged as a JAR file.</p>
-
-<h2 id="structure-of-a-gocd-plugin">Structure of a GoCD Plugin</h2>
-
-<blockquote>
-<p>A plugin for GoCD is a JAR file with the following structure:</p>
-</blockquote>
-
-<div class="highlight"><pre class="highlight plaintext"><code>plugin.jar
-|
-|-- plugin.xml
-|-- com
-|   \-- example
-|       \-- go
-|           \-- testplugin
-|               \-- ConsoleOutNotificationPlugin.class
-|               \-- x.class
-|               \-- y.class
-\-- lib
-    \-- dependency-1.jar
-    \-- dependency-2.jar
-</code></pre></div>
-
-<p>The plugin jar is a self contained-jar. It is expected to contain the following inside it:</p>
-
-<ul>
-<li><code class="prettyprint">plugin.xml</code> — The <a href="#the-plugin-metadata">metadata</a> of your plugin.</li>
-<li>The <a href="#the-plugin-extension-class">plugin extension class</a> (<code class="prettyprint">ConsoleOutNotificationPlugin.class</code> in the example shown) and any other classes that form your plugin.</li>
-<li>Any optional <a href="#the-plugin-dependencies">dependencies</a> your plugin may requires (inside the <code class="prettyprint">lib</code>).</li>
-</ul>
-
-<p><a id='the-plugin-metadata'></a></p>
-
-<h3 id="the-plugin-metadata-plugin-xml">The plugin metadata <code class="prettyprint">plugin.xml</code></h3>
-
-<blockquote>
-<p>Here is an example <code class="prettyprint">plugin.xml</code>:</p>
-</blockquote>
-
-<div class="highlight"><pre class="highlight xml"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8" ?&gt;</span>
-<span class="c">&lt;!-- Your plugin id and version
-     of this XML document, the
-     version must be set to "1" --&gt;</span>
-<span class="nt">&lt;go-plugin</span>
-  <span class="na">id=</span><span class="s">"com.example.rocket.launcher"</span>
-  <span class="na">version=</span><span class="s">"1"</span><span class="nt">&gt;</span>
-  <span class="nt">&lt;about&gt;</span>
-    <span class="c">&lt;!-- The name of your plugin --&gt;</span>
-    <span class="nt">&lt;name&gt;</span>Launches rockets<span class="nt">&lt;/name&gt;</span>
-    <span class="c">&lt;!--  The version of your plugin --&gt;</span>
-    <span class="nt">&lt;version&gt;</span>0.0.1<span class="nt">&lt;/version&gt;</span>
-    <span class="c">&lt;!-- The minimum version of GoCD that this plugin requires --&gt;</span>
-    <span class="nt">&lt;target-go-version&gt;</span>15.1.0<span class="nt">&lt;/target-go-version&gt;</span>
-    <span class="c">&lt;!-- A longer description of your plugin  --&gt;</span>
-    <span class="nt">&lt;description&gt;</span>Launches rockets, spaceships and other things to a destination of your choice.<span class="nt">&lt;/description&gt;</span>
-
-    <span class="c">&lt;!-- Tell us who you are --&gt;</span>
-    <span class="nt">&lt;vendor&gt;</span>
-      <span class="nt">&lt;name&gt;</span>ACME Corp<span class="nt">&lt;/name&gt;</span>
-      <span class="nt">&lt;url&gt;</span>https://www.example.com<span class="nt">&lt;/url&gt;</span>
-    <span class="nt">&lt;/vendor&gt;</span>
-
-    <span class="c">&lt;!-- If this plugin only supports certain OSes --&gt;</span>
-    <span class="nt">&lt;target-os&gt;</span>
-      <span class="nt">&lt;value&gt;</span>Linux<span class="nt">&lt;/value&gt;</span>
-      <span class="nt">&lt;value&gt;</span>Windows<span class="nt">&lt;/value&gt;</span>
-    <span class="nt">&lt;/target-os&gt;</span>
-  <span class="nt">&lt;/about&gt;</span>
-<span class="nt">&lt;/go-plugin&gt;</span>
-</code></pre></div>
-
-<p>This is an XML file that should be present in the plugin jar file at the top level.</p>
-
-<p>You can find the XML Schema for the plugins in the  <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-api/src/main/resources/plugin-descriptor.xsd">main repository</a>.</p>
-
-<p><a name='the-plugin-extension-class'></a></p>
-
-<h3 id="the-plugin-extension-class">The plugin extension class</h3>
-
-<blockquote>
-<p>Add this to your maven <code class="prettyprint">pom.xml</code>:</p>
-</blockquote>
-
-<div class="highlight"><pre class="highlight xml"><code><span class="nt">&lt;dependency&gt;</span>
-  <span class="nt">&lt;groupId&gt;</span>cd.go.plugin<span class="nt">&lt;/groupId&gt;</span>
-  <span class="nt">&lt;artifactId&gt;</span>go-plugin-api<span class="nt">&lt;/artifactId&gt;</span>
-  <span class="nt">&lt;version&gt;</span>20.11.0<span class="nt">&lt;/version&gt;</span>
-<span class="nt">&lt;/dependency&gt;</span>
-</code></pre></div>
-
-<p>In order to use the plugin extension class, you must add the following to your maven dependencies. If you&rsquo;re using <a href="https://gradle.org">gradle</a>, then use <code class="prettyprint">cd.go.plugin:go-plugin-api:20.11.0</code>. You can find the latest version of the plugin in <a href="http://mvnrepository.com/artifact/cd.go.plugin/go-plugin-api">maven central</a>.</p>
-
-<div style='clear: both;'></div>
-
-<blockquote>
-<p>An example plugin class implementation:</p>
-</blockquote>
-
-<div class="highlight"><pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">go</span><span class="o">.</span><span class="na">testplugin</span><span class="o">;</span>
-
-<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.annotation.*</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.exceptions.*</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.request.*</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.response.*</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
-
-<span class="nd">@Extension</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConsoleOutNotificationPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
-  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
-
-  <span class="c1">// this method is executed once at startup</span>
-  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">initializeGoApplicationAccessor</span><span class="o">(</span><span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">)</span> <span class="o">{</span>
-    <span class="k">this</span><span class="o">.</span><span class="na">accessor</span> <span class="o">=</span> <span class="n">accessor</span><span class="o">;</span>
-  <span class="o">}</span>
-
-  <span class="c1">// a GoPluginIdentifier tells GoCD what kind of a plugin this is</span>
-  <span class="c1">// and what version(s) of the request/response API it supports</span>
-  <span class="kd">public</span> <span class="nc">GoPluginIdentifier</span> <span class="nf">pluginIdentifier</span><span class="o">()</span> <span class="o">{</span>
-    <span class="k">return</span> <span class="k">new</span> <span class="nf">GoPluginIdentifier</span><span class="o">(</span><span class="s">"notification"</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"2.0"</span><span class="o">))</span>
-  <span class="o">}</span>
-
-  <span class="c1">// handle the request and return a response</span>
-  <span class="c1">// the response is very much like a HTTP response —</span>
-  <span class="c1">// it has a status code, a response body and optional headers</span>
-  <span class="kd">public</span> <span class="nc">GoPluginApiResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">GoPluginApiRequest</span> <span class="n">request</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnhandledRequestTypeException</span> <span class="o">{</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"go.plugin-settings.get-view"</span><span class="o">))</span> <span class="o">{</span>
-      <span class="nc">String</span> <span class="n">viewHtml</span> <span class="o">=</span> <span class="n">read</span><span class="o">(</span><span class="n">getClass</span><span class="o">().</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="s">"/plugin-settings.template.html"</span><span class="o">));</span>
-      <span class="k">return</span> <span class="k">new</span> <span class="nf">DefaultGoPluginApiResponse</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="n">viewHtml</span><span class="o">);</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"go.plugin-settings.validate-configuration"</span><span class="o">))</span> <span class="o">{</span>
-      <span class="nc">List</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">validate</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
-      <span class="k">return</span> <span class="k">new</span> <span class="nf">DefaultGoPluginApiResponse</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">errors</span><span class="o">));</span>
-    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-      <span class="k">throw</span> <span class="k">new</span> <span class="nf">UnhandledRequestTypeException</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">());</span>
-    <span class="o">}</span>
-  <span class="o">}</span>
-<span class="o">}</span>
-</code></pre></div>
-
-<p>The plugin extension class is a Java class that implements the <code class="prettyprint">GoPlugin</code> interface.</p>
-
-<p>The other types in the example are:</p>
-
-<p class='attributes-table-follows'></p>
-
-<table><thead>
-<tr>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td><a href="#requests-to-the-gocd-server"><code class="prettyprint">GoApplicationAccessor</code></a></td>
-<td>So that the plugin can make requests to the GoCD application to get additional information that is not provided by each request. For example, the plugin can ask for settings, credentials etc.</td>
-</tr>
-<tr>
-<td><code class="prettyprint">GoPluginIdentifier</code></td>
-<td>Provides information about the type of plugin and the version of the request/response it supports.</td>
-</tr>
-<tr>
-<td><code class="prettyprint">GoPluginApiRequest</code></td>
-<td>Represents the request message sent from GoCD to a plugin. The message will have a name and an optional JSON request body and the version of the extension.</td>
-</tr>
-<tr>
-<td><code class="prettyprint">GoPluginApiResponse</code></td>
-<td>Represents the response message as a result of processing the <code class="prettyprint">GoPluginApiRequest</code>. Similar to <code class="prettyprint">GoPluginApiRequest</code>, the response will have a status code and an optional JSON response body.</td>
-</tr>
-</tbody></table>
-
-<p>If you&rsquo;re familiar with http request/responses handled by a web application, you will find this very familiar.</p>
-
-<aside class="notice">
-  GoCD has built in support for allowing plugins to enhance their capabilities in the future without having to break compatibility. This is achieved by ensuring that each extension-point and messages that is sent to the plugin is versioned.
-</aside>
-
-<p><a id='the-plugin-dependencies'></a></p>
-
-<h3 id="the-plugin-dependencies">The plugin dependencies</h3>
-
-<p>Any dependencies that your plugin requires, should go into the <code class="prettyprint">lib</code> directory inside the plugin JAR.</p>
-
-<h2 id="logging">Logging</h2>
-
-<p>Plugins can optionally log events to a log file. Plugin logging is supported by <code class="prettyprint">com.thoughtworks.go.plugin.api.logging.Logger</code> class, the Logger class should be available on including the <code class="prettyprint">go-plugin-api</code> dependency as mentioned earlier.</p>
-
-<blockquote>
-<p>An example for plugin logging:</p>
-</blockquote>
-
-<div class="highlight"><pre class="highlight java"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">go</span><span class="o">.</span><span class="na">testplugin</span><span class="o">;</span>
-
-<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.*</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.logging.Logger</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
-
-<span class="nd">@Extension</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConsoleOutNotificationPlugin</span> <span class="kd">implements</span> <span class="nc">GoPlugin</span> <span class="o">{</span>
-  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">ConsoleOutNotificationPlugin</span><span class="o">);</span>
-  <span class="kd">private</span> <span class="nc">GoApplicationAccessor</span> <span class="n">accessor</span><span class="o">;</span>
-
-  <span class="kd">public</span> <span class="nc">GoPluginApiResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">GoPluginApiRequest</span> <span class="n">request</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnhandledRequestTypeException</span> <span class="o">{</span>
-    <span class="no">LOG</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Request from server: "</span> <span class="o">+</span> <span class="n">request</span><span class="o">.</span><span class="na">requestName</span><span class="o">());</span>
-  <span class="o">}</span>
-<span class="o">}</span>
-</code></pre></div>
-
-<h3 id="log-location">Log location</h3>
-
-<p>Each plugin will have a separate log file and the name of the log file will be in the format <code class="prettyprint">plugin-&lt;plugin_id&gt;.log</code>. The location of the plugin log file will be the same as the location of the GoCD server logs.</p>
-
-<h3 id="log-level">Log level</h3>
-
-<p>The default log level for a plugin is <code class="prettyprint">info</code>. The log level can be controlled using a Java system property which should be provided to the GoCD server.</p>
-
-<p>The system property to control the log level is specific to each plugin and is of the format <code class="prettyprint">plugin.&lt;plugin_id&gt;.log.level=&lt;log_level&gt;</code>. The log level can be either of <code class="prettyprint">info</code>, <code class="prettyprint">debug</code>, <code class="prettyprint">warn</code>, <code class="prettyprint">error</code>.</p>
 
 <h1 id="requests-from-the-gocd-server">Requests from the GoCD server</h1>
 
