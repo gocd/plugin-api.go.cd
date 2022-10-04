@@ -80,7 +80,7 @@ public class PluginExecutor {
 
     if (exitCode != 0) {
       // send error response
-      return new DefaultGoPluginApiResponse(200, "...");
+      return new DefaultGoPluginApiResponse(400, "...");
     } else {
       // send success response
       return new DefaultGoPluginApiResponse(200, "...");
