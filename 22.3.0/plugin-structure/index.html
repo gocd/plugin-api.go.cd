@@ -114,7 +114,7 @@
       </span>
     </a>
     <div class="tocify-wrapper">
-      <a href="../"><img src="../images/logo.png" alt="" /></a>
+      <img src="../images/logo.png" alt="" />
         <div class="lang-selector">
         </div>
       <div class="version-switcher">
@@ -164,10 +164,10 @@
 <li><strong>Java Classes:</strong> 
 
 <ul>
-<li>The <a href="#the-plugin-extension-class">plugin extension classes</a> e.g. <code class="prettyprint">ExampleExtension.class</code> in the example shown </li>
+<li>The <a href="#example-extension-class">plugin extension classes</a> e.g. <code class="prettyprint">ExampleExtension.class</code> in the example shown </li>
 <li>Any other classes used by the in the plugin.</li>
 </ul></li>
-<li><strong>Dependencies:</strong> Any optional <a href="#the-plugin-dependencies">dependencies</a> your plugin may requires (inside the <code class="prettyprint">lib</code>).</li>
+<li><strong>Dependencies:</strong> Any optional <a href="#dependencies">dependencies</a> your plugin may requires (inside the <code class="prettyprint">lib</code>).</li>
 </ol>
 
 <p><a id='the-plugin-metadata'></a></p>
@@ -263,13 +263,13 @@ jar instead downloading various jars for each extensions.</p>
 
 <ol>
 <li><strong>Bundle XML(<code class="prettyprint">gocd-bundle.xml</code>):</strong> The <a href="#the-bundle-xml">metadata</a> of your plugin. </li>
-<li><strong>Plugins:</strong> Each plugin with the <a href="#the-plugin-extension-class">plugin extension class</a> 
+<li><strong>Plugins:</strong> Each plugin with the <a href="#example-extension-class">plugin extension class</a> 
 
 <ul>
 <li><code class="prettyprint">ExampleSCMPlugin.class</code>, <code class="prettyprint">ExampleSecretsExtension.class</code> and <code class="prettyprint">ExampleNotificationPlugin.class</code> in 
 the example shown) and any other classes that form your plugin.</li>
 </ul></li>
-<li><strong>Dependencies:</strong> Any shared <a href="#the-plugin-dependencies">dependencies</a> for all bundles (inside the <code class="prettyprint">lib</code>)</li>
+<li><strong>Dependencies:</strong> Any shared <a href="#dependencies">dependencies</a> for all bundles (inside the <code class="prettyprint">lib</code>)</li>
 </ol>
 
 <h2 id="the-bundle-xml">The Bundle XML</h2>
@@ -345,7 +345,7 @@ to register class(es) as extensions and unregister extension classes will be ign
 </code></pre></div>
 
 <p>In order to use the plugin extension class, you must add <code class="prettyprint">go-plugin-api</code> as dependency.
-Where replace <code class="prettyprint">GOCD_VERSION</code> with the actual version. You can find the available versions of the library in <a href="http://mvnrepository.com/artifact/cd.go.plugin/go-plugin-api">maven central</a>.</p>
+Where replace <code class="prettyprint">GOCD_VERSION</code> with the actual version. You can find the available versions of the library in <a href="https://mvnrepository.com/artifact/cd.go.plugin/go-plugin-api">maven central</a>.</p>
 
 <blockquote>
 <p>Add this to your <code class="prettyprint">build.gradle</code> under dependencies section:</p>
@@ -416,7 +416,7 @@ Where replace <code class="prettyprint">GOCD_VERSION</code> with the actual vers
 </tr>
 </thead><tbody>
 <tr>
-<td><a href="#requests-to-the-gocd-server"><code class="prettyprint">GoApplicationAccessor</code></a></td>
+<td><code class="prettyprint">GoApplicationAccessor</code></td>
 <td>So that the plugin can make requests to the GoCD application to get additional information that is not provided by each request. For example, the plugin can ask for settings, credentials etc.</td>
 </tr>
 <tr>
