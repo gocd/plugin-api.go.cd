@@ -7,25 +7,25 @@ Checkout the live documentation at https://plugin-api.gocd.org
 ### Configure and install middleman
 
 ```
-$ bundle install --path .bundle --binstubs
+bundle install
 ```
 
 ### Serve the documentation locally
 
 ```
-$ ./bin/middleman server
+bundle exec middleman build
 ```
 
 ### Generating the static website
 
 ```
-$ ./bin/rake build
+bundle exec rake build
 ```
 
 ### Publish the website to Github Pages
 
 ```
-$ ./bin/rake publish
+bundle exec rake publish
 ```
 
 ### Releasing a new version of the API
@@ -33,7 +33,7 @@ $ ./bin/rake publish
 Assuming current stable is `16.3.0`, you are about to release `16.4.0` and the next version is going to be `16.5.0`, you would execute —
 
 ```bash
-rake bump_version CURRENT_VERSION=16.3.0 VERSION_TO_RELEASE=16.4.0  NEXT_VERSION=16.5.0 REMOTE_NAME=upstream
+bundle exec rake bump_version CURRENT_VERSION=16.3.0 VERSION_TO_RELEASE=16.4.0  NEXT_VERSION=16.5.0 REMOTE_NAME=upstream
 ```
 
 ## Need help?
