@@ -11,7 +11,7 @@
 ```
 
 In order to use the plugin extension class, you must add `go-plugin-api` as dependency.
-Where replace `GOCD_VERSION` with the actual version. You can find the available versions of the library in [maven central](http://mvnrepository.com/artifact/cd.go.plugin/go-plugin-api).
+Where replace `GOCD_VERSION` with the actual version. You can find the available versions of the library in [maven central](https://mvnrepository.com/artifact/cd.go.plugin/go-plugin-api).
 
 > Add this to your `build.gradle` under dependencies section:
     
@@ -75,12 +75,12 @@ The other types in the example are:
 
 <p class='attributes-table-follows'></p>
 
-| Type                    | Description |
-| ----------------------- | ----------- |
-| [`GoApplicationAccessor`](#requests-to-the-gocd-server) | So that the plugin can make requests to the GoCD application to get additional information that is not provided by each request. For example, the plugin can ask for settings, credentials etc. |
-| `GoPluginIdentifier`    | Provides information about the type of plugin and the version of the request/response it supports. |
-| `GoPluginApiRequest`    | Represents the request message sent from GoCD to a plugin. The message will have a name and an optional JSON request body and the version of the extension. |
-| `GoPluginApiResponse`   | Represents the response message as a result of processing the `GoPluginApiRequest`. Similar to `GoPluginApiRequest`, the response will have a status code and an optional JSON response body. |
+| Type                   | Description |
+| ---------------------- | ----------- |
+| `GoApplicationAccessor`| So that the plugin can make requests to the GoCD application to get additional information that is not provided by each request. For example, the plugin can ask for settings, credentials etc. |
+| `GoPluginIdentifier`   | Provides information about the type of plugin and the version of the request/response it supports. |
+| `GoPluginApiRequest`   | Represents the request message sent from GoCD to a plugin. The message will have a name and an optional JSON request body and the version of the extension. |
+| `GoPluginApiResponse`  | Represents the response message as a result of processing the `GoPluginApiRequest`. Similar to `GoPluginApiRequest`, the response will have a status code and an optional JSON response body. |
 
 If you're familiar with http request/responses handled by a web application, you will find this very familiar.
 

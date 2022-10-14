@@ -24,9 +24,9 @@ The plugin jar is a self contained-jar. It is expected to contain the following 
 
 1. **Plugin XML(`plugin.xml`):** The [metadata](#the-plugin-xml) of your plugin.
 2. **Java Classes:** 
-    - The [plugin extension classes](#the-plugin-extension-class) e.g. `ExampleExtension.class` in the example shown 
+    - The [plugin extension classes](#example-extension-class) e.g. `ExampleExtension.class` in the example shown 
     - Any other classes used by the in the plugin.
-3. **Dependencies:** Any optional [dependencies](#the-plugin-dependencies) your plugin may requires (inside the `lib`).
+3. **Dependencies:** Any optional [dependencies](#dependencies) your plugin may requires (inside the `lib`).
 
 <a id='the-plugin-metadata'></a>
 

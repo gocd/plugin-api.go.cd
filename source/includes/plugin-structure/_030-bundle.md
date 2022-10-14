@@ -35,10 +35,10 @@ bundle.jar
 The bundle jar is a self contained-jar. It is expected to contain the following inside it:
 
 1. **Bundle XML(`gocd-bundle.xml`):** The [metadata](#the-bundle-xml) of your plugin. 
-2. **Plugins:** Each plugin with the [plugin extension class](#the-plugin-extension-class) 
+2. **Plugins:** Each plugin with the [plugin extension class](#example-extension-class) 
     - `ExampleSCMPlugin.class`, `ExampleSecretsExtension.class` and `ExampleNotificationPlugin.class` in 
        the example shown) and any other classes that form your plugin.
-3. **Dependencies:** Any shared [dependencies](#the-plugin-dependencies) for all bundles (inside the `lib`)
+3. **Dependencies:** Any shared [dependencies](#dependencies) for all bundles (inside the `lib`)
 
 
 ## The Bundle XML

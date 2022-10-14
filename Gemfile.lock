@@ -52,7 +52,7 @@ GEM
     hamster (3.0.0)
       concurrent-ruby (~> 1.0)
     hashie (3.6.0)
-    html-proofer (4.4.1)
+    html-proofer (4.4.3)
       addressable (~> 2.3)
       mercenary (~> 0.3)
       nokogiri (~> 1.13)
@@ -174,7 +174,7 @@ GEM
       execjs (>= 0.3.0, < 3)
     webrick (1.7.0)
     yell (2.2.2)
-    zeitwerk (2.6.0)
+    zeitwerk (2.6.1)
 
 PLATFORMS
   ruby

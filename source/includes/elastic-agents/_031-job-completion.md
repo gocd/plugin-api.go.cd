@@ -47,7 +47,7 @@ The intent on this message is to notify the plugin on completion of the job. The
   ...
   <agents>
     <agent hostname="1697e6b164f7" ipaddress="172.17.0.6" uuid="a45e3ca1-4419-4bd5-b18b-882f75ffd4c2" elasticAgentId="GoCD18efbeef995e40f688cd92dc22a4d332" 
-      elasticPluginId="cd.exmaple.elastic-agent" />
+      elasticPluginId="cd.example.elastic-agent" />
   </agents>
 </cruise>
 ```
