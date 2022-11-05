@@ -1,0 +1,569 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name ="description" content="Extend GoCD's functionality. Implement GoCD plugins for SCMs, tasks, notifications, authentication, package repositories, elastic agents and authorization." />
+    <meta name ="keywords" content="gocd plugins, plugins for gocd, extension points, open source gocd, open source continuous delivery" />
+    <link href="images/gocd.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href="images/gocd.png" rel="apple-touch-icon" type="image/png" size="192x192" />
+    <title>GoCD Plugin API Reference</title>
+
+    <style>
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #f8f8f2;
+  background-color: #272822;
+}
+.highlight .err {
+  color: #272822;
+  background-color: #f92672;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #f4bf75;
+}
+.highlight .nt {
+  color: #f4bf75;
+}
+.highlight .o, .highlight .ow {
+  color: #f8f8f2;
+}
+.highlight .p, .highlight .pi {
+  color: #f8f8f2;
+}
+.highlight .gi {
+  color: #a6e22e;
+}
+.highlight .gd {
+  color: #f92672;
+}
+.highlight .gh {
+  color: #66d9ef;
+  background-color: #272822;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #ae81ff;
+}
+.highlight .kc {
+  color: #fd971f;
+}
+.highlight .kt {
+  color: #fd971f;
+}
+.highlight .kd {
+  color: #fd971f;
+}
+.highlight .s, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #a6e22e;
+}
+.highlight .sa {
+  color: #ae81ff;
+}
+.highlight .sr {
+  color: #a1efe4;
+}
+.highlight .si {
+  color: #cc6633;
+}
+.highlight .se {
+  color: #cc6633;
+}
+.highlight .nn {
+  color: #f4bf75;
+}
+.highlight .nc {
+  color: #f4bf75;
+}
+.highlight .no {
+  color: #f4bf75;
+}
+.highlight .na {
+  color: #66d9ef;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #a6e22e;
+}
+.highlight .ss {
+  color: #a6e22e;
+}
+    </style>
+    <link href="stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print.css" rel="stylesheet" media="print" />
+
+      <script src="javascripts/all.js"></script>
+
+
+      <script>
+        $(function() {
+          setupLanguages([]);
+        });
+      </script>
+  </head>
+
+  <body class="index" data-languages="[]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="images/navbar.png" alt="" />
+      </span>
+    </a>
+    <div class="tocify-wrapper">
+      <img src="images/logo.png" alt="" />
+        <div class="lang-selector">
+        </div>
+      <div class="version-switcher">
+        <span class="version-label">Switch version:</span>
+        <select class="version"></select>
+      </div>
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      <div id="toc">
+      </div>
+        <ul class="toc-footer">
+            <li><a href='https://github.com/gocd/plugin-api.go.cd'>Edit this guide on GitHub</a></li>
+            <li><a href='https://api.gocd.org'>GoCD API Documentation</a></li>
+            <li><a href='https://docs.gocd.org'>GoCD User Documentation</a></li>
+        </ul>
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        
+          <h1 id="introduction">Introduction</h1>
+
+<p>Welcome to the GoCD Plugin API! You can use this API to implement GoCD plugins for:</p>
+
+<ul>
+<li><a href="analytics">Analytics</a></li>
+<li><a href="artifacts">Artifacts</a></li>
+<li><a href="authorization">Authorization</a></li>
+<li><a href="config-repo">Config repositories</a></li>
+<li><a href="elastic-agents">Elastic agents</a></li>
+<li><a href="notifications">Notifications</a></li>
+<li><a href="package-repo">Package Repositories</a></li>
+<li><a href="scm">SCMs</a></li>
+<li><a href="tasks">Tasks</a></li>
+<li><a href="secrets">Secrets</a></li>
+</ul>
+
+<p>Plugins, as the name implies, help in extending the functionality of GoCD. GoCD publishes a list of extension points for
+which plugins can be provided. An extension point published by the GoCD - defines the interface and the lifecycle that
+governs the respective plugin. At present only Java based extension points and plugins are supported by GoCD, but the
+interface is simple enough for anyone to build plugins in other languages using a simple HTTP bridge.</p>
+
+<h1 id="plugin-packaging-structure">Plugin packaging structure</h1>
+
+<p>Plugins can be packaged as standalone jar or a combination of multiple plugins in a jar know as plugin bundle. To know
+more about the packaging jar is explained in the following sections:</p>
+
+<ul>
+<li><a href="plugin-structure#structure-of-a-gocd-plugin">GoCD plugin</a></li>
+<li><a href="plugin-structure#structure-of-a-plugins-bundle">GoCD plugins bundle</a></li>
+</ul>
+
+          <h1 id="api-changelog">API Changelog</h1>
+
+<p>The changelog is maintained starting from version 19.2.0 of GoCD. For changes from previous versions, see the release notes at <a href="https://gocd.org/releases">https://gocd.org/releases</a>.</p>
+
+<h2 id="changes-in-gocd-22-3-0">Changes in GoCD 22.3.0</h2>
+
+<p>No changes or deprecations.</p>
+
+<h2 id="changes-in-gocd-22-2-0">Changes in GoCD 22.2.0</h2>
+
+<p>No changes or deprecations.</p>
+
+<h2 id="changes-in-gocd-22-1-0">Changes in GoCD 22.1.0</h2>
+
+<p>No changes or deprecations.</p>
+
+<h2 id="changes-in-gocd-21-4-0">Changes in GoCD 21.4.0</h2>
+
+<p>No changes or deprecations.</p>
+
+<h2 id="changes-in-gocd-21-3-0">Changes in GoCD 21.3.0</h2>
+
+<p>No changes or deprecations.</p>
+
+<h2 id="changes-in-gocd-21-2-0">Changes in GoCD 21.2.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+<li>The Config Repo Extension version 2 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 3 of the Config Repo Extension.</li>
+</ul>
+
+<h2 id="changes-in-gocd-21-1-0">Changes in GoCD 21.1.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+<li>The Config Repo Extension version 2 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 3 of the Config Repo Extension.</li>
+</ul>
+
+<h2 id="changes-in-gocd-20-10-0">Changes in GoCD 20.10.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+<li>The Config Repo Extension version 2 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 3 of the Config Repo Extension.</li>
+</ul>
+
+<h2 id="changes-in-gocd-20-9-0">Changes in GoCD 20.9.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+<li>The Config Repo Extension version 2 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 3 of the Config Repo Extension.</li>
+</ul>
+
+<h2 id="changes-in-gocd-20-8-0">Changes in GoCD 20.8.0</h2>
+
+<h3 id="config-repo-changes">Config Repo (Changes)</h3>
+
+<ul>
+<li>A new version 3 of the <a href="config-repo">Config Repo</a> extension is available. This version introduces the following,
+
+<ul>
+<li>A new message endpoint <a href="config-repo#get-config-files">Get config files</a></li>
+<li>Support for additional <a href="config-repo#get-plugin-capabilities">Plugin Capablities</a> <code class="prettyprint">supports_list_config_files</code> and <code class="prettyprint">supports_user_defined_properties</code></li>
+</ul></li>
+</ul>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+<li>The Config Repo Extension version 2 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 3 of the Config Repo Extension.</li>
+</ul>
+
+<h2 id="changes-in-gocd-20-7-0">Changes in GoCD 20.7.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-20-6-0">Changes in GoCD 20.6.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-20-5-0">Changes in GoCD 20.5.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-20-4-0">Changes in GoCD 20.4.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-20-3-0">Changes in GoCD 20.3.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-20-02-0">Changes in GoCD 20.02.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-20-01-0">Changes in GoCD 20.01.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-19-12-0">Changes in GoCD 19.12.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-19-11-0">Changes in GoCD 19.11.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-19-10-0">Changes in GoCD 19.10.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-19-9-0">Changes in GoCD 19.9.0</h2>
+
+<h3 id="elastic-agents-changes">Elastic Agents (Changes)</h3>
+
+<ul>
+<li>A new version, version 2, of <a href="elastic-agents#log-messages-to-job-console">Log Message to Job Console</a> is available. The difference from the earlier version, version 1, available till GoCD 19.8.0 is that the format of the message has been changed to remove the use of camel-case.</li>
+</ul>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>Version 1 of &ldquo;Log Message to Job Console&rdquo; has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of &ldquo;Log Message to Job Console&rdquo;.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-19-8-0">Changes in GoCD 19.8.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-19-7-0">Changes in GoCD 19.7.0</h2>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the Get Server Info processor.</li>
+</ul>
+
+<h2 id="changes-in-gocd-19-6-0">Changes in GoCD 19.6.0</h2>
+
+<h3 id="secrets-new">Secrets (New)</h3>
+
+<p>We have introduced v1 of the <a href="secrets">Secrets</a> extension endpoint to look up for secrets defined outside of GoCD.</p>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<p>No deprecations in this release.</p>
+
+<h2 id="changes-in-gocd-19-5-0">Changes in GoCD 19.5.0</h2>
+
+<h3 id="elastic-agents-additions">Elastic Agents (Additions)</h3>
+
+<p>A new message which can be sent from the plugin to the GoCD server has been added:</p>
+
+<ul>
+<li><a href="elastic-agents#log-messages-to-job-console">Log Message to Job Console</a>: This allows an elastic agent plugin to log messages to the current job&rsquo;s console.</li>
+</ul>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<p>No deprecations in this release.</p>
+
+<h2 id="changes-in-gocd-19-4-0">Changes in GoCD 19.4.0</h2>
+
+<p>No additions and removals in this release.</p>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in an upcoming release. Plugin developers should use version 2 of the analytics plugin api.</li>
+</ul>
+
+<h2 id="changes-in-gocd-19-3-0">Changes in GoCD 19.3.0</h2>
+
+<h3 id="elastic-agents-additions">Elastic Agents (Additions)</h3>
+
+<p>We have released a new version v5 of the <a href="elastic-agents">Elastic Agents</a> extension. It introduces a new feature of multi cluster support.</p>
+
+<p>The new messages added are:</p>
+
+<ul>
+<li><a href="elastic-agents#get-cluster-status-report">Get Cluster Status Report</a></li>
+<li><a href="elastic-agents#get-cluster-profile-view">Get Cluster Profile View</a></li>
+<li><a href="elastic-agents#get-cluster-profile-metadata">Get Cluster Profile Metadata</a></li>
+<li><a href="elastic-agents#validate-cluster-profile">Validate Cluster Profile</a></li>
+<li><a href="elastic-agents#migrate-config">Migrate Config</a></li>
+</ul>
+
+<h3 id="elastic-agents-changes">Elastic Agents (Changes)</h3>
+
+<p>Endpoints defined in previous versions of this API have been enhanced, in the new version:</p>
+
+<ul>
+<li><a href="elastic-agents#create-agent">Create Agent</a></li>
+<li><a href="elastic-agents#should-assign-work">Should Assign Work</a></li>
+<li><a href="elastic-agents#server-ping">Server Ping</a></li>
+<li><a href="elastic-agents#get-plugin-capabilities">Capabilities</a></li>
+<li><a href="elastic-agents#job-completion">Job Completion</a></li>
+<li><a href="elastic-agents#get-agent-status-report">Agent Status Report</a></li>
+<li><a href="elastic-agents#get-cluster-status-report">Get Cluster Status Report</a></li>
+<li><a href="elastic-agents#get-plugin-status-report">Plugin Status Report</a></li>
+</ul>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>The elastic agent plugin extension version 4 has been deprecated. This version will be removed in a release scheduled for Aug 2019. Plugin developers should use version 5 of the elastic agent plugin api to allow adding support for multi cluster. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in a release scheduled for April 2019. Plugin developers should use version 2 of the Get Server Info processor.</li>
+<li>The authorization extension v1 has been deprecated. This version will be removed in a release scheduled for September 2019. Plugin developers should upgrade their plugins to the latest version.</li>
+<li>The config repositories extension v1 has been deprecated. This version will be removed in a release scheduled for September 2019. Plugin developers should upgrade their plugins to the latest version.</li>
+</ul>
+
+<h2 id="changes-in-gocd-19-2-0">Changes in GoCD 19.2.0</h2>
+
+<h3 id="config-repositories-additions">Config repositories (Additions)</h3>
+
+<ul>
+<li>Supports version 2 of <a href="config-repo">Config repositories</a> extension API. Version 2 adds the following new messages:
+
+<ul>
+<li><a href="config-repo#parse-content">Parse Content</a></li>
+<li><a href="config-repo#pipeline-export">Pipeline Export</a></li>
+<li><a href="config-repo#get-plugin-icon">Plugin Icon</a></li>
+<li><a href="config-repo#get-plugin-capabilities">Plugin Capabilities</a></li>
+</ul></li>
+</ul>
+
+<h3 id="authorization-additions">Authorization (Additions)</h3>
+
+<ul>
+<li>Supports version 2 of <a href="authorization">Authorization</a> extension API. Version 2 adds the following new messages:
+
+<ul>
+<li><a href="authorization#is-valid-user">Is Valid User</a></li>
+<li><a href="authorization#get-user-roles">Get User Roles</a></li>
+</ul></li>
+</ul>
+
+<h3 id="authorization-changes">Authorization (Changes)</h3>
+
+<ul>
+<li>Plugins <a href="authorization#get-plugin-capabilities">Capabilities</a> message is enhanced to add a new capablity <code class="prettyprint">can_get_user_roles</code>.</li>
+</ul>
+
+<h3 id="deprecations-across-extensions">Deprecations (across extensions)</h3>
+
+<ul>
+<li>The elastic agent plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the elastic agent plugin api to allow adding support for job completion request. The docker, docker swarm, kubernetes and ecs plugins have been migrated to the new versions, and users should upgrade their plugins to the latest version to see these new features.</li>
+<li>The notification plugin extension version 3 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 4 of the notification plugin api.</li>
+<li>The analytics plugin extension version 1 has been deprecated. This version will be removed in a release scheduled for Mar 2019. Plugin developers should use version 2 of the analytics plugin api.</li>
+<li>The Get Server Info processor version 1 has been deprecated. This version will be removed in a release scheduled for April 2019. Plugin developers should use version 2 of the Get Server Info processor.</li>
+<li>The authorization extension v1 has been deprecated. This version will be removed in a release scheduled for September 2019. Plugin developers should upgrade their plugins to the latest version.</li>
+<li>The config repositories extension v1 has been deprecated. This version will be removed in a release scheduled for September 2019. Plugin developers should upgrade their plugins to the latest version.</li>
+</ul>
+
+      </div>
+      <div class="dark-box">
+          <div class="lang-selector">
+          </div>
+      </div>
+    </div>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-48357651-2', 'auto');
+  ga('send', 'pageview');
+</script>
+  </body>
+</html>
