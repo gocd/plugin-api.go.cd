@@ -34,11 +34,11 @@ access API(s) via access token created using the same plugin.
 
 <p class='request-body-heading'>Request parameters</p>
 
-Request parameters would contain all request parameters sent by the external authorization server to GoCD.
+The server will not provide any parameters.
 
 <p class='request-body-heading'>Request headers</p>
 
-Request headers would contain all the HTTP request headers sent by the external authorization server to GoCD.
+The server will not provide any headers.
 
 <p class='response-code-heading'>Response Body</p>
 
