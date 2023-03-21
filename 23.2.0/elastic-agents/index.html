@@ -493,18 +493,18 @@ profile configuration for which this assignment needs to be made.</li>
 <p>The plugin is expected to return status <code class="prettyprint">200</code> if it can understand the request.</p>
 <h2 id="migrate-config">Migrate config</h2>
 
-<p>This message is a request to the plugin perform the migration on the existing config on load of the plugin. This allows 
+<p>This message is a request to the plugin perform migration of the existing config on load of the plugin. This allows 
 a plugin to perform the migration on the existing config in order to support the newer version of the plugin. </p>
 
 <aside class="warning">
-  <strong>Important:</strong> Starting from elastic agent extension version v5 then plugin settings are not supported for
-   the extension and we expect plugin author to migrate existing plugin settings to the cluster profile. 
+  <strong>Important:</strong> Starting from elastic agent extension version v5 the plugin settings are not supported for 
+  the extension and we expect plugin author to migrate existing plugin settings to the cluster profile. 
 </aside>
 
 <aside class="notice">
-  <strong>Important:</strong> The GoCD server will update the `cluster profiles` and `elastic profiles` in the as returned
-   by the plugin in response body. The plugin settings want we deleted and it will remain unchanged. This allows user to 
-   go back to the pervios version of the plugin without any manual intervention.  
+  <strong>Important:</strong> The GoCD server will update the `cluster profiles` and `elastic profiles` in configuration
+  as returned by the plugin in the response body. The plugin settings won&rsquo;t be deleted and will remain unchanged. This 
+  allows users to revert to a previous version of the plugin without any manual intervention.  
 </aside>
 
 <p class='request-name-heading'>Request name</p>
