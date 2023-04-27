@@ -3,4 +3,3 @@
 //= require ./app/_search
 //= require ./app/_toc
 //= require ./app/_version_helper
-//= require ./app/_gdpr-banner
