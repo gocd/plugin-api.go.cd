@@ -4,7 +4,7 @@ ruby '~> 3.2'
 gem 'html-proofer'
 
 # Middleman
-gem "middleman", "~> 4.4"
+gem "middleman", "~> 4.5"
 gem "middleman-gh-pages", "~> 0.4.1"
 gem "middleman-syntax", "~> 3.3.0"
 gem "middleman-autoprefixer", "~> 3.0"
