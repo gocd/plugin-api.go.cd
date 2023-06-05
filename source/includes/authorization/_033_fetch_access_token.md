@@ -20,17 +20,21 @@ This is a message that a web based plugin should implement. In case of web based
       "client_id": "jd9no0f",
       "client_secret": "0njfg8fgmfvufv"
     }
-  }]
+  }],
+  "auth_session": {
+    "key": "value"
+  }
 }
 ```
 
 
 <p class='attributes-table-follows'></p>
 
-| Key            | Type     | Description                                                                   |
-|----------------|----------|-------------------------------------------------------------------------------|
-| `auth_configs` | `Object` | This key contains list of `<authconfig>` configured for the plugin. |
-| `role_configs` | `Object` | This key contains list of `<roleconfig>` configured for the plugin. |
+| Key            | Type     | Description                                                                                             |
+|----------------|----------|---------------------------------------------------------------------------------------------------------|
+| `auth_configs` | `Object` | This key contains list of `<authconfig>` configured for the plugin.                                     |
+| `role_configs` | `Object` | This key contains list of `<roleconfig>` configured for the plugin.                                     |
+| `auth_session` | `Object` | This key contains any session state that was provided during the get authentication sever URL exchange. |
 
 <p class='request-body-heading'>Request parameters</p>
 
