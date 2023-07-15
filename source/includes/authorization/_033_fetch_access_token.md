@@ -20,17 +20,24 @@ This is a message that a web based plugin should implement. In case of web based
       "client_id": "jd9no0f",
       "client_secret": "0njfg8fgmfvufv"
     }
-  }]
+  }],
+  "auth_session": {
+    "key": "value"
+  }
 }
 ```
 
 
 <p class='attributes-table-follows'></p>
 
-| Key            | Type     | Description                                                                   |
-|----------------|----------|-------------------------------------------------------------------------------|
-| `auth_configs` | `Object` | This key contains list of `<authconfig>` configured for the plugin. |
-| `role_configs` | `Object` | This key contains list of `<roleconfig>` configured for the plugin. |
+| Key            | Type     | Description                                                                                                                                                                                                                                          |
+|----------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `auth_configs` | `Object` | This key contains list of `<authconfig>` configured for the plugin.                                                                                                                                                                                  |
+| `role_configs` | `Object` | This key contains list of `<roleconfig>` configured for the plugin.                                                                                                                                                                                  |
+| `auth_session` | `Object` | This key contains a flat object/dictionary of string keys and values that was previously provided during the [get authentication server URL](#authorization-server-url) exchange. Will be empty if nothing was earlier supplied, and can be ignored. |
+
+See [get authentication server URL](#authorization-server-url) for an example of how `auth_session` might be used for additional validation
+within these subsequent calls.
 
 <p class='request-body-heading'>Request parameters</p>
 

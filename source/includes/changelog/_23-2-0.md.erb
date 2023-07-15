@@ -1,0 +1,7 @@
+## Changes in GoCD 23.2.0
+
+### Authorization (Changes)
+
+- Plugins that support [web based authentication capabilities](authorization#get-plugin-capabilities) can now optionally store temporary
+  state against the login session during [retrieval of the authorization server redirect URL](authorization#authorization-server-url) by returning
+  an optional `auth_session` object/dictionary, which will be supplied back to the plugin during [Fetch Access Token](authorization#fetch-access-token) for further verification.
