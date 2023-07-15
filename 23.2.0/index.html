@@ -173,6 +173,16 @@ more about the packaging jar is explained in the following sections:</p>
 
 <p>The changelog is maintained starting from version 19.2.0 of GoCD. For changes from previous versions, see the release notes at <a href="https://gocd.org/releases">https://gocd.org/releases</a>.</p>
 
+<h2 id="changes-in-gocd-23-2-0">Changes in GoCD 23.2.0</h2>
+
+<h3 id="authorization-changes">Authorization (Changes)</h3>
+
+<ul>
+<li>Plugins that support <a href="authorization#get-plugin-capabilities">web based authentication capabilities</a> can now optionally store temporary
+state against the login session during <a href="authorization#authorization-server-url">retrieval of the authorization server redirect URL</a> by returning
+an optional <code class="prettyprint">auth_session</code> object/dictionary, which will be supplied back to the plugin during <a href="authorization#fetch-access-token">Fetch Access Token</a> for further verification.</li>
+</ul>
+
 <h2 id="changes-in-gocd-23-1-0">Changes in GoCD 23.1.0</h2>
 
 <p>No changes or deprecations.</p>
