@@ -13,7 +13,7 @@ bundle install
 ### Serve the documentation locally
 
 ```
-bundle exec middleman build
+bundle exec middleman serve
 ```
 
 ### Generating the static website
