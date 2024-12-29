@@ -573,7 +573,7 @@ This is not the configuration in the plugin settings page.</p>
 </span></code></pre></div>
 
 <p>The plugin is expected to return a JSON object (corresponding to
-<a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/messages/ParseDirectoryResponseMessage.java">ParseDirectoryResponseMessage</a>
+<a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-access/src/main/java/com/thoughtworks/go/plugin/access/configrepo/v3/messages/ParseDirectoryResponseMessage.java">ParseDirectoryResponseMessage</a>
 with these top level attributes:</p>
 
 <h4 id="1-the-target_version-element">1. The <code class="prettyprint">target_version</code> element</h4>
@@ -596,7 +596,7 @@ changes in the value of <code class="prettyprint">target_version</code> are desc
 <h4 id="2-the-environments-element">2. The <code class="prettyprint">environments</code> element</h4>
 
 <p>The <code class="prettyprint">environments</code> element is a list of environment objects (corresponding to
-<a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/CREnvironment.java">CREnvironment</a>)
+<a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/CREnvironment.java">CREnvironment</a>)
 , each of which has a <code class="prettyprint">name</code>, <code class="prettyprint">environment_variables</code> (for the whole environment), <code class="prettyprint">agents</code> in this environment and the
 <code class="prettyprint">pipelines</code> in this environment.</p>
 
@@ -605,7 +605,7 @@ changes in the value of <code class="prettyprint">target_version</code> are desc
 <h4 id="3-the-errors-element">3. The <code class="prettyprint">errors</code> element</h4>
 
 <p>If this list has any errors defined (corresponding to
-<a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/CRError.java">CRError</a>),
+<a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/CRError.java">CRError</a>),
 the configuration will be considered invalid and the errors will be shown to the user in an appropriate manner.</p>
 
 <h4 id="4-the-pipelines-element">4. The <code class="prettyprint">pipelines</code> element</h4>
@@ -613,7 +613,7 @@ the configuration will be considered invalid and the errors will be shown to the
 <p>A fairly comprehensive response with a <code class="prettyprint">pipelines</code> element is shown in the example. Not all of the parts are
 mandatory. Some noteworthy properties of this element are:</p>
 
-<p>- This element corresponds to the <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/CRPipeline.java">CRPipeline</a> object in GoCD.</p>
+<p>- This element corresponds to the <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/CRPipeline.java">CRPipeline</a> object in GoCD.</p>
 
 <p>- <code class="prettyprint">name</code> is mandatory (and should be unique across the GoCD server).</p>
 
@@ -627,14 +627,14 @@ mandatory. Some noteworthy properties of this element are:</p>
 
 <p>- The different kinds of materials are shown in the example. They correspond to these objects in the GoCD contract
       part of the codebase:
-      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRGitMaterial.java">CRGitMaterial (git)</a>,
-      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRSvnMaterial.java">CRSvnMaterial (SVN)</a>,
-      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRP4Material.java">CRP4Material (P4)</a>,
-      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRHgMaterial.java">CRHgMaterial (Hg)</a>,
-      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRPackageMaterial.java">CRPackageMaterial (Package)</a>,
-      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRTfsMaterial.java">CRTfsMaterial (TFS)</a>,
-      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRDependencyMaterial.java">CRDependencyMaterial (Dependency)</a> and
-      <a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRPluggableScmMaterial.java">CRPluggableScmMaterial (SCM plugin)</a>.</p>
+      <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRGitMaterial.java">CRGitMaterial (git)</a>,
+      <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRSvnMaterial.java">CRSvnMaterial (SVN)</a>,
+      <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRP4Material.java">CRP4Material (P4)</a>,
+      <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRHgMaterial.java">CRHgMaterial (Hg)</a>,
+      <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRPackageMaterial.java">CRPackageMaterial (Package)</a>,
+      <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRTfsMaterial.java">CRTfsMaterial (TFS)</a>,
+      <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRDependencyMaterial.java">CRDependencyMaterial (Dependency)</a> and
+      <a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRPluggableScmMaterial.java">CRPluggableScmMaterial (SCM plugin)</a>.</p>
 
 <p>- Jobs cannot have both <code class="prettyprint">resources</code> and <code class="prettyprint">elastic_profile_id</code> defined. They can have one of them or neither define.</p>
 
@@ -745,7 +745,7 @@ destination and filters (whitelist/blacklist)</strong>. Then, it uses the modifi
 <p class='response-body-heading'>Response body</p>
 
 <p>The plugin is expected to return a JSON object (corresponding to
-<a href="https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/messages/ParseDirectoryResponseMessage.java">ParseDirectoryResponseMessage</a>). Please reference to <a href="#parse-directory"><code class="prettyprint">parse-drectory</code></a> for details and examples of the response body.</p>
+<a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-access/src/main/java/com/thoughtworks/go/plugin/access/configrepo/v3/messages/ParseDirectoryResponseMessage.java">ParseDirectoryResponseMessage</a>). Please reference to <a href="#parse-directory"><code class="prettyprint">parse-drectory</code></a> for details and examples of the response body.</p>
 
 <h2 id="pipeline-export">Pipeline export</h2>
 
@@ -873,7 +873,7 @@ essentially the reverse of the <a href="#parse-directory"><code class="prettypri
 <p class='response-body-heading'>Response body</p>
 
 <p>The plugin is expected to return a JSON object (corresponding to
-<a href="https://github.com/gocd/gocd/blob/b8cbce628afca8b20726e5fbd81ebea1e20091fe/plugin-infra/go-plugin-access/src/main/java/com/thoughtworks/go/plugin/access/configrepo/v2/messages/PipelineExportResponseMessage.java"><code class="prettyprint">PipelineExportResponseMessage</code></a>. The response body contains a single attribute:</p>
+<a href="https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-access/src/main/java/com/thoughtworks/go/plugin/access/configrepo/v3/messages/PipelineExportResponseMessage.java"><code class="prettyprint">PipelineExportResponseMessage</code></a>. The response body contains a single attribute:</p>
 
 <h4 id="pipeline"><code class="prettyprint">pipeline</code></h4>
 
