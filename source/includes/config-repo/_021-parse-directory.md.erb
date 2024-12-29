@@ -381,7 +381,7 @@ The plugin is expected to return status `200` if it can understand the request.
 ```
 
 The plugin is expected to return a JSON object (corresponding to
-[ParseDirectoryResponseMessage](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/messages/ParseDirectoryResponseMessage.java)
+[ParseDirectoryResponseMessage](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-access/src/main/java/com/thoughtworks/go/plugin/access/configrepo/v3/messages/ParseDirectoryResponseMessage.java)
 with these top level attributes:
 
 #### 1. The `target_version` element
@@ -397,7 +397,7 @@ changes in the value of `target_version` are described below:
 #### 2. The `environments` element
 
 The `environments` element is a list of environment objects (corresponding to
-[CREnvironment](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/CREnvironment.java))
+[CREnvironment](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/CREnvironment.java))
 , each of which has a `name`, `environment_variables` (for the whole environment), `agents` in this environment and the
 `pipelines` in this environment.
 
@@ -407,7 +407,7 @@ See example shown.
 #### 3. The `errors` element
 
 If this list has any errors defined (corresponding to
-[CRError](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/CRError.java)),
+[CRError](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/CRError.java)),
 the configuration will be considered invalid and the errors will be shown to the user in an appropriate manner.
 
 
@@ -416,7 +416,7 @@ the configuration will be considered invalid and the errors will be shown to the
 A fairly comprehensive response with a `pipelines` element is shown in the example. Not all of the parts are
 mandatory. Some noteworthy properties of this element are:
 
-    - This element corresponds to the [CRPipeline](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/CRPipeline.java) object in GoCD.
+    - This element corresponds to the [CRPipeline](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/CRPipeline.java) object in GoCD.
 
     - `name` is mandatory (and should be unique across the GoCD server).
 
@@ -430,14 +430,14 @@ mandatory. Some noteworthy properties of this element are:
 
     - The different kinds of materials are shown in the example. They correspond to these objects in the GoCD contract
       part of the codebase:
-      [CRGitMaterial (git)](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRGitMaterial.java),
-      [CRSvnMaterial (SVN)](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRSvnMaterial.java),
-      [CRP4Material (P4)](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRP4Material.java),
-      [CRHgMaterial (Hg)](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRHgMaterial.java),
-      [CRPackageMaterial (Package)](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRPackageMaterial.java),
-      [CRTfsMaterial (TFS)](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRTfsMaterial.java),
-      [CRDependencyMaterial (Dependency)](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRDependencyMaterial.java) and
-      [CRPluggableScmMaterial (SCM plugin)](https://github.com/gocd/gocd/blob/3e1cb5a981afb05bf387e22b125c6b2a66525b05/plugin-infra/go-plugin-access/src/com/thoughtworks/go/plugin/access/configrepo/contract/material/CRPluggableScmMaterial.java).
+      [CRGitMaterial (git)](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRGitMaterial.java),
+      [CRSvnMaterial (SVN)](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRSvnMaterial.java),
+      [CRP4Material (P4)](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRP4Material.java),
+      [CRHgMaterial (Hg)](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRHgMaterial.java),
+      [CRPackageMaterial (Package)](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRPackageMaterial.java),
+      [CRTfsMaterial (TFS)](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRTfsMaterial.java),
+      [CRDependencyMaterial (Dependency)](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRDependencyMaterial.java) and
+      [CRPluggableScmMaterial (SCM plugin)](https://github.com/gocd/gocd/blob/master/plugin-infra/go-plugin-config-repo/src/main/java/com/thoughtworks/go/plugin/configrepo/contract/material/CRPluggableScmMaterial.java).
 
     - Jobs cannot have both `resources` and `elastic_profile_id` defined. They can have one of them or neither define.
 
