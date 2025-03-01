@@ -24,7 +24,6 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.4
           bundler-cache: true # would run bundle install
       - name: Run the build
         run: bundle exec middleman build
@@ -40,7 +39,6 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.4
           bundler-cache: true # would run bundle install
       - name: Set up user in git config
         run: |
@@ -65,7 +63,6 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.4
           bundler-cache: true # would run bundle install
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
