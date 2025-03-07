@@ -4,7 +4,7 @@ ruby '~> 3.4'
 gem 'html-proofer'
 
 # Middleman
-gem "middleman", "~> 4.5"
+gem "middleman", "~> 4.6"
 gem "mutex_m"
 gem 'sassc', github: 'sass/sassc-ruby', ref: 'refs/pull/233/head'
 gem 'sassc-embedded'
