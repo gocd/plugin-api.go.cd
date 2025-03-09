@@ -253,7 +253,6 @@ PLATFORMS
 
 DEPENDENCIES
   aws-sdk-s3
-  haml
   html-proofer
   listen (= 3.9.0)
   middleman
