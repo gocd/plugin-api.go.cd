@@ -254,7 +254,7 @@ PLATFORMS
 DEPENDENCIES
   aws-sdk-s3
   html-proofer
-  listen (= 3.9.0)
+  listen
   middleman
   middleman-autoprefixer
   middleman-gh-pages
@@ -263,7 +263,7 @@ DEPENDENCIES
   middleman-syntax
   mime-types
   parallel
-  rake (~> 13.2.1)
+  rake
   redcarpet
   rouge
   sassc!
