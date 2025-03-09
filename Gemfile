@@ -1,8 +1,6 @@
 source 'https://rubygems.org'
 ruby '~> 3.4'
 
-gem 'html-proofer'
-
 # Middleman
 gem 'middleman'
 gem 'sassc', github: 'sass/sassc-ruby', ref: 'refs/pull/233/head'
@@ -20,3 +18,4 @@ gem 'aws-sdk-s3'
 gem 'parallel'
 gem 'listen', '3.9.0'
 gem 'mime-types'
+gem 'html-proofer'
