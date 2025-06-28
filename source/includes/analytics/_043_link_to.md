@@ -56,9 +56,9 @@ To link to the job details page, the parameter object should contain these keys:
 | `job_name`         | The name of the job.                    |
 
 
-### Request key: `link-to` pipeline instance page
+### Request key: `link-to` VSM page
 
-> An example message from iframe to parent window to link to pipeline instance page:
+> An example message from iframe to parent window to link to VSM page:
 
 ```html
 <html>
@@ -68,12 +68,12 @@ To link to the job details page, the parameter object should contain these keys:
   AnalyticsEndpoint.onInit(function(initialData, transport) {
     ...
     transport.request("link-to", {
-      link_to: "pipeline_instance_page",
+      link_to: "vsm_page",
       pipeline_name: "my_pipeline",
       pipeline_counter: 10
     })
     .done(function(data) {
-      console.log("Done! Navigated to pipeline instance page!");
+      console.log("Done! Navigated to VSM page!");
     })
     .fail(function(errors) {
       console.log("Something failed: " + errors);
@@ -90,19 +90,19 @@ To link to the job details page, the parameter object should contain these keys:
 }
 ```
 
-> This will be the equivalent of opening a new tab with the URL: `http://ci.example.com/go/pipelines/my_pipeline/10/my_first_stage/1`.
+> This will be the equivalent of opening a new tab with the URL: `http://ci.example.com/go/pipelines/value_stram_map/my_pipeline/10`.
 
 Any links opened directly from the plugin's front-end will open inside the iframe. For security reasons, the iframe cannot affect the
 navigation of the parent GoCD window directly. Instead, the iframe can send a message with the key `link-to` to the
 parent window to link to one of a specific set of GoCD pages.
 
-The version `v1` of the message supports linking to first stage of a Pipeline Instance. Upon receiving this message
+The version `v1` of the message supports linking to the VSM. Upon receiving this message
 with correct parameters the parent window will open the linked page in a new tab.
 
-To link to the pipeline instance page, the parameter object should contain these keys:
+To link to the VSM page, the parameter object should contain these keys:
 
-| Key                | Description                                   |
-|--------------------|-----------------------------------------------|
-| `link_to`          | The value should be `pipeline_instance_page`. |
-| `pipeline_name`    | The name of the pipeline to link to.          |
-| `pipeline_counter` | The counter of the pipeline.                  |
+| Key                | Description                          |
+|--------------------|--------------------------------------|
+| `link_to`          | The value should be `vsm_page`.      |
+| `pipeline_name`    | The name of the pipeline to link to. |
+| `pipeline_counter` | The counter of the pipeline.         |
