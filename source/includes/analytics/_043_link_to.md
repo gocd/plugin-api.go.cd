@@ -90,7 +90,7 @@ To link to the job details page, the parameter object should contain these keys:
 }
 ```
 
-> This will be the equivalent of opening a new tab with the URL: `http://ci.example.com/go/pipelines/value_stram_map/my_pipeline/10`.
+> This will be the equivalent of opening a new tab with the URL: `http://ci.example.com/go/pipelines/value_stream_map/my_pipeline/10`.
 
 Any links opened directly from the plugin's front-end will open inside the iframe. For security reasons, the iframe cannot affect the
 navigation of the parent GoCD window directly. Instead, the iframe can send a message with the key `link-to` to the
