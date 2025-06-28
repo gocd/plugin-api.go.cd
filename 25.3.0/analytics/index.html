@@ -1208,10 +1208,10 @@ window will open the linked page in a new tab.</p>
 </tr>
 </tbody></table>
 
-<h3 id="request-key-link-to-pipeline-instance-page">Request key: <code class="prettyprint">link-to</code> pipeline instance page</h3>
+<h3 id="request-key-link-to-vsm-page">Request key: <code class="prettyprint">link-to</code> VSM page</h3>
 
 <blockquote>
-<p>An example message from iframe to parent window to link to pipeline instance page:</p>
+<p>An example message from iframe to parent window to link to VSM page:</p>
 </blockquote>
 
 <div class="highlight"><pre class="highlight html"><code><span class="nt">&lt;html&gt;</span>
@@ -1221,12 +1221,12 @@ window will open the linked page in a new tab.</p>
   <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
     <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-to</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
-      <span class="na">link_to</span><span class="p">:</span> <span class="dl">"</span><span class="s2">pipeline_instance_page</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">link_to</span><span class="p">:</span> <span class="dl">"</span><span class="s2">vsm_page</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">pipeline_name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">my_pipeline</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">pipeline_counter</span><span class="p">:</span> <span class="mi">10</span>
     <span class="p">})</span>
     <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Navigated to pipeline instance page!</span><span class="dl">"</span><span class="p">);</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Navigated to VSM page!</span><span class="dl">"</span><span class="p">);</span>
     <span class="p">})</span>
     <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
@@ -1244,17 +1244,17 @@ window will open the linked page in a new tab.</p>
 </code></pre></div>
 
 <blockquote>
-<p>This will be the equivalent of opening a new tab with the URL: <code class="prettyprint">http://ci.example.com/go/pipelines/my_pipeline/10/my_first_stage/1</code>.</p>
+<p>This will be the equivalent of opening a new tab with the URL: <code class="prettyprint">http://ci.example.com/go/pipelines/value_stream_map/my_pipeline/10</code>.</p>
 </blockquote>
 
 <p>Any links opened directly from the plugin&rsquo;s front-end will open inside the iframe. For security reasons, the iframe cannot affect the
 navigation of the parent GoCD window directly. Instead, the iframe can send a message with the key <code class="prettyprint">link-to</code> to the
 parent window to link to one of a specific set of GoCD pages.</p>
 
-<p>The version <code class="prettyprint">v1</code> of the message supports linking to first stage of a Pipeline Instance. Upon receiving this message
+<p>The version <code class="prettyprint">v1</code> of the message supports linking to the VSM. Upon receiving this message
 with correct parameters the parent window will open the linked page in a new tab.</p>
 
-<p>To link to the pipeline instance page, the parameter object should contain these keys:</p>
+<p>To link to the VSM page, the parameter object should contain these keys:</p>
 
 <table><thead>
 <tr>
@@ -1264,7 +1264,7 @@ with correct parameters the parent window will open the linked page in a new tab
 </thead><tbody>
 <tr>
 <td><code class="prettyprint">link_to</code></td>
-<td>The value should be <code class="prettyprint">pipeline_instance_page</code>.</td>
+<td>The value should be <code class="prettyprint">vsm_page</code>.</td>
 </tr>
 <tr>
 <td><code class="prettyprint">pipeline_name</code></td>
