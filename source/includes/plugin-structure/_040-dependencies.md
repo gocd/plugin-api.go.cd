@@ -17,7 +17,7 @@ Where replace `GOCD_VERSION` with the actual version. You can find the available
     
 ```groovy
 dependencies {
-  compileOnly group: 'cd.go.plugin', name: 'go-plugin-api', version: 'GOCD_VERSION'
+  compileOnly 'cd.go.plugin:go-plugin-api:GOCD_VERSION'
 }
 ```
 
