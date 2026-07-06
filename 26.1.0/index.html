@@ -173,7 +173,24 @@ more about the packaging jar is explained in the following sections:</p>
 
 <p>The changelog is maintained starting from version 19.2.0 of GoCD. For changes from previous versions, see the release notes at <a href="https://gocd.org/releases">https://gocd.org/releases</a>.</p>
 
-<h2 id="changes-in-gocd-25-4-0">Changes in GoCD 25.4.0</h2>
+<h2 id="changes-in-gocd-26-1-0">Changes in GoCD 26.1.0</h2>
+
+<p>No deprecations.</p>
+
+<h3 id="logging">Logging</h3>
+
+<p>Plugins targeting GoCD 26.1.0+ can now provide a logger name via a string; allowing custom log redirectors to be
+written (e.g custom SLF4J implementations which delegate to GoCD&rsquo;s plugin logging API).</p>
+
+<p><div class="highlight"><pre class="highlight java"><code><span class="kn">import</span> <span class="nn">com.thoughtworks.go.plugin.api.logging.Logger</span><span class="o">;</span>
+<span class="c1">//...</span></p>
+
+<p><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="s">&quot;my-logger&quot;</span><span class="o">,</span> <span class="nc">MyPlugin</span><span class="o">.</span><span class="na">PLUGIN_ID</span><span class="o">);</span></p>
+
+<p><span class="c1">// Rather than one of:</span>
+<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">MyPlugin</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Logger</span> <span class="no">LOG</span> <span class="o">=</span> <span class="nc">Logger</span><span class="o">.</span><span class="na">getLoggerFor</span><span class="o">(</span><span class="nc">MyPlugin</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="nc">MyPlugin</span><span class="o">.</span><span class="na">PLUGIN_ID</span><span class="o">);</span>
+</code></pre></div><h2 id="changes-in-gocd-25-4-0">Changes in GoCD 25.4.0</h2></p>
 
 <p>No changes or deprecations.</p>
 
