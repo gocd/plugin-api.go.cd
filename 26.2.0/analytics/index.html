@@ -47,6 +47,16 @@
   background-color: #272822;
   font-weight: bold;
 }
+.highlight .ge {
+  font-style: italic;
+}
+.highlight .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+.highlight .gs {
+  font-weight: bold;
+}
 .highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
   color: #ae81ff;
 }
@@ -930,7 +940,7 @@ successful, the response body will be empty.</p>
 <p>Example load using a Javascript module loading system:</p>
 </blockquote>
 
-<div class="highlight"><pre class="highlight javascript"><code><span class="kd">const</span> <span class="nx">AnalyticsEndpoint</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">"</span><span class="s2">analytics-endpoint.js</span><span class="dl">"</span><span class="p">);</span>
+<div class="highlight"><pre class="highlight javascript"><code><span class="kd">const</span> <span class="nx">AnalyticsEndpoint</span> <span class="o">=</span> <span class="nf">require</span><span class="p">(</span><span class="dl">"</span><span class="s2">analytics-endpoint.js</span><span class="dl">"</span><span class="p">);</span>
 
 <span class="c1">// The rest of your script here...</span>
 </code></pre></div>
@@ -960,12 +970,12 @@ analytics-endpoint.js API&rsquo;s.</p>
 <span class="nt">&lt;head&gt;</span>
   <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
   <span class="nt">&lt;script&gt;</span>
-  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// Your code goes here to render your initial data and</span>
     <span class="c1">// any further interactions with the GoCD parent page.</span>
   <span class="p">});</span>
 
-  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Finally, set up receiving endpoint</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Finally, set up receiving endpoint</span>
   <span class="nt">&lt;/script&gt;</span>
 <span class="nt">&lt;/head&gt;</span>
 <span class="nt">&lt;body&gt;</span>
@@ -1002,12 +1012,12 @@ analytics-endpoint.js API&rsquo;s.</p>
 <p>Example snippet:</p>
 </blockquote>
 
-<div class="highlight"><pre class="highlight javascript"><code><span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre class="highlight javascript"><code><span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">params</span> <span class="o">=</span> <span class="p">{</span> <span class="na">url</span><span class="p">:</span> <span class="dl">"</span><span class="s2">https://google.com</span><span class="dl">"</span> <span class="p">};</span>
-  <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-external</span><span class="dl">"</span><span class="p">,</span> <span class="nx">params</span><span class="p">).</span>
-    <span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">success! received: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span> <span class="p">}).</span>
-    <span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">failed due to: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">errors</span><span class="p">));</span> <span class="p">}).</span>
-    <span class="nx">always</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">all done here.</span><span class="dl">"</span><span class="p">);</span> <span class="p">});</span>
+  <span class="nx">transport</span><span class="p">.</span><span class="nf">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-external</span><span class="dl">"</span><span class="p">,</span> <span class="nx">params</span><span class="p">).</span>
+    <span class="nf">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">success! received: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span> <span class="p">}).</span>
+    <span class="nf">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">failed due to: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">stringify</span><span class="p">(</span><span class="nx">errors</span><span class="p">));</span> <span class="p">}).</span>
+    <span class="nf">always</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">all done here.</span><span class="dl">"</span><span class="p">);</span> <span class="p">});</span>
 <span class="p">});</span>
 </code></pre></div>
 
@@ -1049,9 +1059,9 @@ analytics-endpoint.js API&rsquo;s.</p>
 <span class="nt">&lt;head&gt;</span>
   <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
   <span class="nt">&lt;script&gt;</span>
-  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
-    <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">fetch-analytics</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nx">transport</span><span class="p">.</span><span class="nf">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">fetch-analytics</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
       <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">pipeline</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">metric</span><span class="p">:</span> <span class="dl">"</span><span class="s2">pipeline_duration</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">pipeline_name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">my_pipeline</span><span class="dl">"</span><span class="p">,</span>
@@ -1059,16 +1069,16 @@ analytics-endpoint.js API&rsquo;s.</p>
       <span class="na">user_defined_param1</span><span class="p">:</span> <span class="dl">"</span><span class="s2">something</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">user_defined_param2</span><span class="p">:</span> <span class="dl">"</span><span class="s2">something_else</span><span class="dl">"</span>
     <span class="p">})</span>
-      <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">dataObject</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Got: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">dataObject</span><span class="p">);</span>
+      <span class="p">.</span><span class="nf">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">dataObject</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Got: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">dataObject</span><span class="p">);</span>
       <span class="p">})</span>
-      <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
+      <span class="p">.</span><span class="nf">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
       <span class="p">});</span>
   <span class="p">});</span>
 
-  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
   <span class="nt">&lt;/script&gt;</span>
 <span class="nt">&lt;/head&gt;</span>
 <span class="nt">&lt;body&gt;</span>
@@ -1135,9 +1145,9 @@ to the <code class="prettyprint">fetch-analytics</code> call.</p>
 <span class="nt">&lt;head&gt;</span>
   <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
   <span class="nt">&lt;script&gt;</span>
-  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
-    <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-to</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nx">transport</span><span class="p">.</span><span class="nf">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-to</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
       <span class="na">link_to</span><span class="p">:</span> <span class="dl">"</span><span class="s2">job_details_page</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">pipeline_name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">my_pipeline</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">pipeline_counter</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
@@ -1145,15 +1155,15 @@ to the <code class="prettyprint">fetch-analytics</code> call.</p>
       <span class="na">stage_counter</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
       <span class="na">job_name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">job1</span><span class="dl">"</span>
     <span class="p">})</span>
-    <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Navigated to job details page!</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">.</span><span class="nf">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Navigated to job details page!</span><span class="dl">"</span><span class="p">);</span>
     <span class="p">})</span>
-    <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
+    <span class="p">.</span><span class="nf">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
     <span class="p">});</span>
   <span class="p">});</span>
 
-  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
   <span class="nt">&lt;/script&gt;</span>
 <span class="nt">&lt;/head&gt;</span>
 <span class="nt">&lt;body&gt;</span>
@@ -1218,22 +1228,22 @@ window will open the linked page in a new tab.</p>
 <span class="nt">&lt;head&gt;</span>
   <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
   <span class="nt">&lt;script&gt;</span>
-  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
-    <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-to</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nx">transport</span><span class="p">.</span><span class="nf">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-to</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
       <span class="na">link_to</span><span class="p">:</span> <span class="dl">"</span><span class="s2">vsm_page</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">pipeline_name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">my_pipeline</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">pipeline_counter</span><span class="p">:</span> <span class="mi">10</span>
     <span class="p">})</span>
-    <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Navigated to VSM page!</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">.</span><span class="nf">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Done! Navigated to VSM page!</span><span class="dl">"</span><span class="p">);</span>
     <span class="p">})</span>
-    <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
+    <span class="p">.</span><span class="nf">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
     <span class="p">});</span>
   <span class="p">});</span>
 
-  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
   <span class="nt">&lt;/script&gt;</span>
 <span class="nt">&lt;/head&gt;</span>
 <span class="nt">&lt;body&gt;</span>
@@ -1290,20 +1300,20 @@ link to a page outside of GoCD. The parent window will open the page in a new ta
 <span class="nt">&lt;head&gt;</span>
   <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"analytics-endpoint.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
   <span class="nt">&lt;script&gt;</span>
-  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">onInit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">initialData</span><span class="p">,</span> <span class="nx">transport</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
-    <span class="nx">transport</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-external</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nx">transport</span><span class="p">.</span><span class="nf">request</span><span class="p">(</span><span class="dl">"</span><span class="s2">link-external</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
       <span class="na">url</span><span class="p">:</span> <span class="dl">"</span><span class="s2">https://url.link.to.external.page</span><span class="dl">"</span>
     <span class="p">})</span>
-    <span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Navigated to the specified URL!</span><span class="dl">"</span><span class="p">);</span>
+    <span class="p">.</span><span class="nf">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Navigated to the specified URL!</span><span class="dl">"</span><span class="p">);</span>
     <span class="p">})</span>
-    <span class="p">.</span><span class="nx">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
+    <span class="p">.</span><span class="nf">fail</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">errors</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something failed: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">errors</span><span class="p">);</span>
     <span class="p">});</span>
   <span class="p">});</span>
 
-  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nx">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
+  <span class="nx">AnalyticsEndpoint</span><span class="p">.</span><span class="nf">ensure</span><span class="p">(</span><span class="dl">"</span><span class="s2">v1</span><span class="dl">"</span><span class="p">);</span>
   <span class="nt">&lt;/script&gt;</span>
 <span class="nt">&lt;/head&gt;</span>
 <span class="nt">&lt;body&gt;</span>
